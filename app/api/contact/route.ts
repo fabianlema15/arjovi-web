@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { leads } from "@/db/schema";
+import { getDb } from "@/lib/db";
 
 type ContactBody = {
   name?: string;
@@ -24,7 +26,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Later: persist with Postgres, e.g. await sql`INSERT INTO leads ...`
+  if (process.env.DATABASE_URL) {
+    await getDb().insert(leads).values({ name, phone, email, message });
+  }
+
   const inbox = process.env.CONTACT_INBOX ?? "fabianlema@arjovi.com";
   const response = await fetch(`https://formsubmit.co/ajax/${inbox}`, {
     method: "POST",

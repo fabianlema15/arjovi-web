@@ -1,21 +1,26 @@
-/**
- * Postgres will plug in here later (Neon on Vercel is the usual pairing).
- *
- * Example:
- *   import { neon } from "@neondatabase/serverless";
- *   export const sql = neon(process.env.DATABASE_URL!);
- *
- * Or Prisma:
- *   export const db = new PrismaClient();
- *
- * A first table for contact leads might look like:
- *   CREATE TABLE leads (
- *     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
- *     name text NOT NULL,
- *     phone text NOT NULL,
- *     email text NOT NULL,
- *     message text NOT NULL,
- *     created_at timestamptz NOT NULL DEFAULT now()
- *   );
- */
-export const db = null;
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "@/db/schema";
+
+type PostgresClient = ReturnType<typeof postgres>;
+
+const globalForDb = globalThis as unknown as {
+  postgres?: PostgresClient;
+};
+
+function createClient() {
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error("DATABASE_URL is not set");
+  }
+
+  return postgres(url, { prepare: false, max: 1 });
+}
+
+export function getDb() {
+  const client = globalForDb.postgres ?? createClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalForDb.postgres = client;
+  }
+  return drizzle(client, { schema });
+}
