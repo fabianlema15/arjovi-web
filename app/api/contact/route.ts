@@ -26,29 +26,49 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
+  let stored = false;
   if (process.env.DATABASE_URL) {
-    await getDb().insert(leads).values({ name, phone, email, message });
+    try {
+      await getDb().insert(leads).values({ name, phone, email, message });
+      stored = true;
+    } catch (error) {
+      console.error("contact insert failed", error);
+      return NextResponse.json({ error: "Could not save message" }, { status: 502 });
+    }
   }
 
   const inbox = process.env.CONTACT_INBOX ?? "fabianlema@arjovi.com";
-  const response = await fetch(`https://formsubmit.co/ajax/${inbox}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      name,
-      phone,
-      email,
-      message,
-      _subject: "New message from Arjovi Solutions website",
-    }),
-  });
-
-  if (!response.ok) {
-    return NextResponse.json({ error: "Send failed" }, { status: 502 });
+  try {
+    const response = await fetch(`https://formsubmit.co/ajax/${inbox}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        phone,
+        email,
+        message,
+        _captcha: "false",
+        _subject: "New message from Arjovi Solutions website",
+      }),
+    });
+    const payload = (await response.json()) as { success?: boolean | string };
+    const emailed =
+      response.ok && payload.success !== false && payload.success !== "false";
+    if (!emailed) {
+      console.error("contact email failed", response.status, payload);
+    }
+    if (stored || emailed) {
+      return NextResponse.json({ ok: true });
+    }
+  } catch (error) {
+    console.error("contact email failed", error);
+    if (stored) {
+      return NextResponse.json({ ok: true });
+    }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ error: "Send failed" }, { status: 502 });
 }
