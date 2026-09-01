@@ -15,7 +15,7 @@ export function RevealFallback() {
     }
 
     const revealItems = document.querySelectorAll(
-      ".features-grid > *, .section-head, .split > *, .service-card, .gallery-item, .contact-layout > *"
+      ".features-grid > *, .section-head, .split > *, .service-card, .gallery-carousel, .contact-layout > *"
     );
 
     const observer = new IntersectionObserver(
