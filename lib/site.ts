@@ -6,7 +6,7 @@ export const site = {
   phoneHref: "tel:+16128075426",
   location: "Otsego, MN",
   description:
-    "Painting, landscaping, tree care, snow removal, and pressure washing in Otsego, Minnesota. Free estimates.",
+    "Painting, landscaping, hardscaping, demolition, and handyman services in Otsego, Minnesota. Free estimates.",
 };
 
 export const services = [
@@ -23,10 +23,28 @@ export const services = [
     body: "Transform your outdoor space with professional landscaping services, from lawn care to custom designs, ensuring a beautiful and well-maintained environment.",
   },
   {
+    title: "Hardscaping",
+    image: "/assets/services/hardscaping.jpg",
+    alt: "Retaining wall, raised garden beds, and fresh mulch in a backyard",
+    body: "Patios, retaining walls, steps, and stone work built to last. Clean lines, solid structure, and a yard that is easier to live in.",
+  },
+  {
     title: "Tree and Bush Trimming or Removal",
     image: "/assets/services/trees.jpg",
     alt: "Mature trees and trimmed greenery around a home",
     body: "Enhance the health and appearance of your trees and bushes with expert trimming, or safely remove any that are damaged or unwanted.",
+  },
+  {
+    title: "Demolition",
+    image: "/assets/services/demolition.jpg",
+    alt: "Interior demolition with support posts, rubble, and tools",
+    body: "Safe tear-out of old decks, walls, sheds, and site debris. We clear the way so your next project can start right.",
+  },
+  {
+    title: "Handyman",
+    image: "/assets/services/handyman.jpg",
+    alt: "Wooden hillside steps being built beside a home",
+    body: "Repairs, small builds, and the jobs that never make the list. One call for the work that keeps your home in shape.",
   },
   {
     title: "Snow Removal",
@@ -34,73 +52,97 @@ export const services = [
     alt: "Snow-covered residential driveway and walkway",
     body: "Keep your property safe and accessible during winter with fast and reliable snow removal services for driveways, walkways, and more.",
   },
-  {
-    title: "Water Pressure Washing",
-    image: "/assets/services/pressure-washing.jpg",
-    alt: "Pressure washing a concrete surface",
-    body: "Revitalize surfaces like driveways, decks, and siding with high-powered water pressure washing, removing dirt, grime, and stains.",
-  },
 ];
 
 export const gallery = [
   {
+    src: "/assets/gallery/duplex-exterior-painting.jpg",
+    caption: "Duplex exterior painting",
+    alt: "Before and after of a duplex painted teal with white trim",
+  },
+  {
+    src: "/assets/gallery/egress-window-well.jpg",
+    caption: "Egress window well rebuilt",
+    alt: "Before and after of a rebuilt basement egress window well",
+  },
+  {
+    src: "/assets/gallery/hillside-wood-steps.jpg",
+    caption: "Hillside wood steps",
+    alt: "Before and after of wooden steps built into a hillside",
+  },
+  {
+    src: "/assets/gallery/sod-installation.jpg",
+    caption: "Sod installation",
+    alt: "Before and after of a backyard with new sod installed",
+  },
+  {
+    src: "/assets/gallery/patio-and-steps.jpg",
+    caption: "Patio and steps restored",
+    alt: "Before and after of a refinished patio with rebuilt wood steps",
+  },
+  {
+    src: "/assets/gallery/mulch-installation.jpg",
+    caption: "Mulch installation",
+    alt: "Before and after of a side yard cleared and covered in mulch",
+  },
+  {
     src: "/assets/gallery/patio.jpg",
-    caption: "Patio 20 × 20",
+    caption: "20 × 20 paver patio",
     alt: "Before and after of a 20 by 20 paver patio",
   },
   {
     src: "/assets/gallery/retaining-wall.jpg",
-    caption: "Retaining wall",
-    alt: "Retaining wall project",
+    caption: "Retaining wall and garden beds",
+    alt: "Before and after of a retaining wall with raised garden beds",
   },
   {
     src: "/assets/gallery/landscaping.jpg",
-    caption: "Landscaping",
-    alt: "Before and after landscaping",
+    caption: "Walkway and rock garden",
+    alt: "Before and after of a concrete walkway with a rock garden",
   },
   {
     src: "/assets/gallery/deck-restoration.jpg",
-    caption: "Deck restoration",
-    alt: "Restored deck",
+    caption: "Deck stained and restored",
+    alt: "Before and after of a wooden deck stained and restored",
   },
   {
     src: "/assets/gallery/river-rocks.jpg",
-    caption: "River rocks around the house",
-    alt: "River rock landscaping around a house",
+    caption: "River rock foundation border",
+    alt: "Before and after of a river rock border along a house foundation",
   },
   {
     src: "/assets/gallery/landscape-maintenance.jpg",
-    caption: "Complete landscape maintenance",
-    alt: "Completed landscape maintenance",
+    caption: "Garden bed rebuilt",
+    alt: "Before and after of an overgrown bed cleared and rebuilt with gravel",
   },
   {
     src: "/assets/gallery/removing-bushes.jpg",
-    caption: "Removing bushes",
-    alt: "Bush removal around a property",
+    caption: "Bushes removed, new sod",
+    alt: "Before and after of bushes removed beside a house with new sod",
   },
   {
     src: "/assets/gallery/pressure-washer.jpg",
-    caption: "Restoring with high pressure washer",
-    alt: "Surface restored with a pressure washer",
+    caption: "Fountain surround rebuilt",
+    alt: "Before and after of a stacked-stone fountain surround",
   },
   {
     src: "/assets/gallery/retaining-wall-restoration.jpg",
-    caption: "Retaining wall restoration",
-    alt: "Restored retaining wall",
+    caption: "Retaining wall rebuilt",
+    alt: "Before and after of a rebuilt block retaining wall",
   },
   {
     src: "/assets/gallery/resloping.jpg",
-    caption: "Resloping the backyard",
-    alt: "Backyard after resloping",
+    caption: "Grading and drainage",
+    alt: "Before and after of a muddy yard graded, sodded, and drained",
   },
   {
     src: "/assets/gallery/new-landscaping.jpg",
-    caption: "New landscaping area",
-    alt: "Newly landscaped garden area",
+    caption: "River rock border by the deck",
+    alt: "Before and after of a river rock border installed beside a deck",
   },
   {
     src: "/assets/gallery/exterior-painting.jpg",
-    caption: "Exterior painting",
-    alt: "Before and after exterior house painting",
+    caption: "Exterior siding painted",
+    alt: "Before and after of weathered siding painted a rich brown",
   },
 ];

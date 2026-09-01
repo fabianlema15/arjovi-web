@@ -26,8 +26,8 @@ export default function HomePage() {
             <p className="eyebrow">Otsego, Minnesota</p>
             <h1>Home and outdoor solutions you can count on.</h1>
             <p className="hero-lead">
-              Painting, landscaping, tree care, snow removal, and pressure
-              washing — done with care, and built on relationships with every
+              Painting, landscaping, hardscaping, demolition, and handyman
+              work — done with care, and built on relationships with every
               customer.
             </p>
             <div className="hero-actions">
