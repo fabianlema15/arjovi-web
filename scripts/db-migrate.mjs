@@ -1,5 +1,8 @@
+import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
-import { loadEnvConfig } from "@next/env";
+
+const require = createRequire(import.meta.url);
+const { loadEnvConfig } = require("@next/env");
 
 loadEnvConfig(process.cwd());
 
