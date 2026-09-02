@@ -69,7 +69,11 @@ export function Gallery() {
     }
 
     if (active && !dialog.open) {
+      const x = window.scrollX;
+      const y = window.scrollY;
       dialog.showModal();
+      window.scrollTo({ left: x, top: y, behavior: "auto" });
+      dialog.focus({ preventScroll: true });
     } else if (!active && dialog.open) {
       dialog.close();
     }

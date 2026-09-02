@@ -2,21 +2,20 @@
 
 import { useEffect } from "react";
 
+const REVEAL_SELECTOR =
+  ".features-grid > *, .section-head, .split > *, .service-card, .gallery-carousel, .contact-layout > *";
+
 export function RevealFallback() {
   useEffect(() => {
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    const hasViewTimeline =
-      typeof CSS !== "undefined" && CSS.supports("animation-timeline: view()");
 
-    if (reduceMotion || hasViewTimeline) {
+    if (reduceMotion) {
       return;
     }
 
-    const revealItems = document.querySelectorAll(
-      ".features-grid > *, .section-head, .split > *, .service-card, .gallery-carousel, .contact-layout > *"
-    );
+    const revealItems = document.querySelectorAll(REVEAL_SELECTOR);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -37,7 +36,7 @@ export function RevealFallback() {
           observer.unobserve(el);
         });
       },
-      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" }
     );
 
     const frame = requestAnimationFrame(() => {

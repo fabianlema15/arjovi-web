@@ -64,6 +64,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${oswald.variable} ${barlow.variable}`}>
       <body suppressHydrationWarning>
         <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try{if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)document.body.classList.add("js-reveal")}catch(e){}',
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
