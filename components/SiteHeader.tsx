@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { scrollToTop } from "@/lib/scroll";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -12,7 +13,12 @@ export function SiteHeader() {
   return (
     <header className="site-header" id="top">
       <div className="container header-inner">
-        <a className="brand" href="#top" aria-label="Arjovi Solutions home">
+        <a
+          className="brand"
+          href="#top"
+          aria-label="Arjovi Solutions home"
+          onClick={scrollToTop}
+        >
           <img
             className="brand-logo logo-light"
             src="/assets/brand/logo-horizontal.png"

@@ -1,10 +1,19 @@
+"use client";
+
+import { scrollToTop } from "@/lib/scroll";
+
 export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="site-footer" id="footer">
       <div className="container footer-inner">
-        <a className="brand" href="#top" aria-label="Arjovi Solutions home">
+        <a
+          className="brand"
+          href="#top"
+          aria-label="Arjovi Solutions home"
+          onClick={scrollToTop}
+        >
           <img
             className="brand-logo logo-light"
             src="/assets/brand/logo-horizontal.png"
@@ -21,7 +30,9 @@ export function SiteFooter() {
           />
         </a>
         <p>© {year} Arjovi Solutions. Otsego, MN.</p>
-        <a href="#top">Back to top</a>
+        <a href="#top" onClick={scrollToTop}>
+          Back to top
+        </a>
       </div>
     </footer>
   );
