@@ -46,6 +46,8 @@ export async function POST(request: Request) {
     console.error("contact email failed", error);
   }
 
+  console.info("contact result", { stored, emailed });
+
   if (stored || emailed) {
     return NextResponse.json({ ok: true });
   }
