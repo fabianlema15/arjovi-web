@@ -8,6 +8,13 @@
       "when": 1788113908966,
       "tag": "0000_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788325278291,
+      "tag": "0001_quotes",
+      "breakpoints": true
     }
   ]
 }

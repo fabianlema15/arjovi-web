@@ -1,5 +1,7 @@
 export const site = {
   name: "Arjovi Solutions",
+  legalName: "ARJOVI Solutions LLC",
+  owner: "Fabian Lema",
   url: "https://www.arjovi.com",
   email: "fabianlema@arjovi.com",
   phone: "(612) 807-5426",

@@ -913,3 +913,235 @@ body.js-reveal .contact-layout > *.is-visible {
 .card-actions .btn {
   width: 100%;
 }
+
+.quotes-app {
+  min-height: 100svh;
+  background: var(--bg);
+}
+
+.quotes-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.quotes-nav a {
+  color: inherit;
+}
+
+.quotes-nav-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.quotes-list-wrap {
+  padding: 1.25rem;
+}
+
+.quotes-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.quotes-list th,
+.quotes-list td {
+  text-align: left;
+  padding: 0.7rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.quotes-login {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.quotes-login-card {
+  width: min(24rem, 100%);
+  padding: 1.75rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.quotes-login-form,
+.quotes-login-form label {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quotes-login-form input,
+.quotes-toolbar input,
+.quote-table-edit input,
+.quotes-composer textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.quotes-workspace {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) minmax(22rem, 1.2fr);
+  min-height: calc(100svh - 4.5rem);
+}
+
+.quotes-chat {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  min-height: 70vh;
+}
+
+.quotes-thread {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.quotes-bubble {
+  max-width: 38rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.9rem;
+  background: var(--surface);
+}
+
+.quotes-bubble.user {
+  justify-self: end;
+  background: rgba(255, 113, 0, 0.16);
+}
+
+.quotes-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.quotes-composer {
+  padding: 1rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.65rem;
+}
+
+.quotes-composer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quotes-doc {
+  padding: 1rem 1.15rem 2rem;
+  overflow: auto;
+}
+
+.quotes-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 0.6rem;
+  align-items: end;
+  margin-bottom: 0.8rem;
+}
+
+.quotes-toolbar label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.quotes-notice,
+.quotes-status,
+.quotes-empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.quotes-edit-heading {
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.quote-sheet {
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  background: #fff;
+  color: #1a1a1a;
+  border-radius: 0.4rem;
+}
+
+.quote-sheet h1 {
+  font-size: 1.25rem;
+  text-transform: none;
+  color: inherit;
+}
+
+.quote-sheet h2 {
+  font-size: 1rem;
+  text-transform: none;
+  margin-top: 1.1rem;
+  color: inherit;
+}
+
+.quote-sheet-brand strong {
+  display: block;
+  font-size: 1.15rem;
+}
+
+.quote-sheet-brand p,
+.quote-sheet-meta {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.quote-scope {
+  padding-left: 1.2rem;
+}
+
+.quote-table-wrap {
+  overflow-x: auto;
+}
+
+.quote-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.quote-table th,
+.quote-table td {
+  padding: 0.45rem 0.4rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.quote-table th:not(:first-child),
+.quote-table td:not(:first-child) {
+  text-align: right;
+}
+
+.quote-grand {
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .quotes-workspace,
+  .quotes-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .quotes-chat {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    min-height: 50vh;
+  }
+}
