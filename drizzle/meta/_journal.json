@@ -15,6 +15,13 @@
       "when": 1788325278291,
       "tag": "0001_quotes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788361937413,
+      "tag": "0002_robust_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

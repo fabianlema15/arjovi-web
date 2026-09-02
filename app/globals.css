@@ -1039,6 +1039,48 @@ body.js-reveal .contact-layout > *.is-visible {
   gap: 0.5rem;
 }
 
+.quotes-photo {
+  display: block;
+  max-width: min(100%, 16rem);
+  border-radius: 0.5rem;
+  margin: 0.4rem 0;
+}
+
+.quotes-photo-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quotes-photo-list li {
+  position: relative;
+}
+
+.quotes-photo-list img {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: 0.4rem;
+}
+
+.quotes-photo-list button {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 0;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
 .quotes-doc {
   padding: 1rem 1.15rem 2rem;
   overflow: auto;

@@ -1,3 +1,9 @@
+export type QuoteAttachment = {
+  mediaType: string;
+  url: string;
+  filename?: string;
+};
+
 export type QuoteLineItem = {
   description: string;
   labor: number;

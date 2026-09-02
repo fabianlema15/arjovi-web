@@ -4,6 +4,7 @@ import { openaiErrorMessage } from "@/lib/openai-error";
 import { requireQuoteCookie } from "@/lib/quote-auth";
 import { quoteModel } from "@/lib/quote-model";
 import { quoteChatSystem } from "@/lib/quote-prompt";
+import { fileParts } from "@/lib/quote-images";
 import { addMessage, getQuote } from "@/lib/quotes-db";
 
 export const runtime = "nodejs";
@@ -43,8 +44,14 @@ export async function POST(
   const last = messages.at(-1);
   if (last?.role === "user") {
     const text = messageText(last);
-    if (text) {
-      await addMessage(id, "user", text);
+    const attachments = fileParts(last);
+    if (text || attachments.length) {
+      await addMessage(
+        id,
+        "user",
+        text || "Quote this from the photo(s).",
+        attachments
+      );
     }
   }
 

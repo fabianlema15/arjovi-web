@@ -202,12 +202,13 @@ If something I request isn't practical or needs a different approach, explain it
 export const quoteChatSystem = `${masterPrompt}
 
 You are talking to Fabian in the ARJOVI quotes app. Follow the master prompt above.
+He may attach job photos. Look at them: materials, condition, size clues, access, height, damage, existing work. Say what you can see and what you are assuming. Ask only for measurements that would change the price.
 When the estimate is ready, tell him he can click Draft quote to generate the customer PDF.`;
 
 export const quoteEstimateSystem = `${masterPrompt}
 
 Write the full professional estimate for this project the same way you would in ChatGPT.
-Do not skip work, quantities, equipment, disposal, or Minnesota market prices.
+Use any attached job photos. Do not skip work, quantities, equipment, disposal, or Minnesota market prices.
 Do not underprice materials.`;
 
 export const quoteExtractSystem = `Extract the customer-facing quote from the estimate below into the schema.

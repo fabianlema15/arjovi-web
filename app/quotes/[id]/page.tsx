@@ -42,6 +42,7 @@ export default async function QuoteDetailPage({
           id: message.id,
           role: message.role,
           content: message.content,
+          attachments: message.attachments ?? [],
         }))}
       />
     </main>

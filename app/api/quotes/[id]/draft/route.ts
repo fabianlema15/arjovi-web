@@ -2,6 +2,7 @@ import { generateText, Output } from "ai";
 import { NextResponse } from "next/server";
 import { openaiErrorMessage } from "@/lib/openai-error";
 import { requireQuoteCookie } from "@/lib/quote-auth";
+import { toEstimateMessages } from "@/lib/quote-images";
 import { quoteModel } from "@/lib/quote-model";
 import { quoteEstimateSystem, quoteExtractSystem } from "@/lib/quote-prompt";
 import { quoteBodySchema } from "@/lib/quote-schema";
@@ -41,17 +42,19 @@ export async function POST(
     );
   }
 
-  const transcript = history
-    .map((message) => `${message.role}: ${message.content}`)
-    .join("\n\n");
-
   console.info("quote draft started", { id, messages: history.length });
 
   try {
     const { text: estimate } = await generateText({
       model: quoteModel,
       system: quoteEstimateSystem,
-      prompt: `Conversation:\n${transcript}\n\nCurrent customer name: ${quote.customerName}\nCurrent customer email: ${quote.customerEmail}`,
+      messages: [
+        ...toEstimateMessages(history),
+        {
+          role: "user",
+          content: `Write the full professional estimate now.\nCurrent customer name: ${quote.customerName}\nCurrent customer email: ${quote.customerEmail}`,
+        },
+      ],
       maxRetries: 0,
       timeout: 60_000,
     });

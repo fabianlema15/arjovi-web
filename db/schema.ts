@@ -1,5 +1,5 @@
 import { jsonb, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import type { QuoteBody } from "@/lib/quote";
+import type { QuoteAttachment, QuoteBody } from "@/lib/quote";
 
 export const leads = pgTable("leads", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -35,6 +35,7 @@ export const quoteMessages = pgTable("quote_messages", {
     .references(() => quotes.id, { onDelete: "cascade" }),
   role: text("role").notNull(),
   content: text("content").notNull(),
+  attachments: jsonb("attachments").$type<QuoteAttachment[]>().notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

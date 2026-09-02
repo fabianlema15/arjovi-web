@@ -1,7 +1,7 @@
 import { desc, eq, max } from "drizzle-orm";
 import { quoteMessages, quotes } from "@/db/schema";
 import { getDb } from "@/lib/db";
-import { emptyQuoteBody, type QuoteBody } from "@/lib/quote";
+import { emptyQuoteBody, type QuoteAttachment, type QuoteBody } from "@/lib/quote";
 
 export async function nextQuoteNumber() {
   const [row] = await getDb()
@@ -44,9 +44,12 @@ export async function listMessages(quoteId: string) {
 export async function addMessage(
   quoteId: string,
   role: "user" | "assistant",
-  content: string
+  content: string,
+  attachments: QuoteAttachment[] = []
 ) {
-  await getDb().insert(quoteMessages).values({ quoteId, role, content });
+  await getDb()
+    .insert(quoteMessages)
+    .values({ quoteId, role, content, attachments });
 }
 
 export async function saveQuoteBody(
