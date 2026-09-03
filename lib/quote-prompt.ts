@@ -95,12 +95,11 @@ Examples:
 - Existing conditions assumed to be suitable for the proposed work.
 - Hidden damage is not included.
 - Major structural repairs are not included unless specified.
-- Permit/inspection fees are not included unless specified.
 - Customer-supplied materials are excluded from material pricing.
 - Additional work discovered after demolition requires customer approval.
 - Existing materials may be reused when practical.
 - Final dimensions should be verified before materials are ordered.
-Only include notes that are relevant to the specific project.
+Only include notes that are relevant to the specific project. Do not mention permits or licenses.
 
 5. IMPORTANT — DON'T OVERPRICE SMALL JOBS
 For small handyman jobs, don't automatically apply large-contractor pricing.
@@ -216,4 +215,5 @@ Copy labor and material dollar amounts exactly. Do not lower, round down, or omi
 Do not put 💡 My Recommendation, price ranges, or internal advice into the fields.
 If there were options, price the option Fabian chose, or Option 1. Mention other options in notes as replacements, not add-ons.
 If a customer name or email appeared, use it.
-Title may start with one fitting emoji.`;
+Title may start with one fitting emoji.
+Do not add language about a site visit, that the quote is not a contract, or permits and licenses. Do not mention permits or licenses at all.`;

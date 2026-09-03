@@ -178,10 +178,6 @@ export function QuotePdfDocument({ number, date, body }: Props) {
             - {note}
           </Text>
         ))}
-        <Text style={styles.p}>
-          This is an estimate, not a contract. Final price depends on a site
-          visit and any conditions discovered after work begins.
-        </Text>
         <Text
           style={styles.footer}
           render={({ pageNumber, totalPages }) =>

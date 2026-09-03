@@ -12,7 +12,7 @@ export default function QuotesLoginPage() {
     <main className="quotes-login">
       <article className="quotes-login-card">
         <h1>Quotes</h1>
-        <p>Staff only. Estimates are not contracts.</p>
+        <p>Staff only.</p>
         <QuotesLoginForm />
       </article>
     </main>

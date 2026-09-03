@@ -102,10 +102,6 @@ export function QuotePreview({ number, date, body }: Props) {
         {body.notes.map((note) => (
           <li key={note}>{note}</li>
         ))}
-        <li>
-          This is an estimate, not a contract. Final price depends on a site
-          visit and any conditions discovered after work begins.
-        </li>
       </ul>
     </article>
   );

@@ -67,7 +67,6 @@ export async function POST(
       `Quote #${quote.number} for ${body.customerName || "you"}.`,
       body.title,
       `Estimated total: ${formatMoney(totals.total)}`,
-      "This is an estimate, not a contract. See the attached PDF.",
     ].join("\n\n"),
     attachments: [
       {
