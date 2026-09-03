@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { quotes } from "@/db/schema";
 import { requireQuoteCookie } from "@/lib/quote-auth";
@@ -44,6 +45,8 @@ export async function PATCH(
   };
 
   const saved = await saveQuoteBody(id, body, quote.status === "sent" ? "sent" : "ready");
+  revalidatePath("/quotes");
+  revalidatePath(`/quotes/${id}`);
   return NextResponse.json(saved);
 }
 
@@ -59,5 +62,7 @@ export async function DELETE(
 
   const { id } = await params;
   await getDb().delete(quotes).where(eq(quotes.id, id));
+  revalidatePath("/quotes");
+  revalidatePath(`/quotes/${id}`);
   return NextResponse.json({ ok: true });
 }

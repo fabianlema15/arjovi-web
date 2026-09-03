@@ -1,5 +1,6 @@
 import { generateText, Output } from "ai";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { openaiErrorMessage } from "@/lib/openai-error";
 import { requireQuoteCookie } from "@/lib/quote-auth";
 import { toEstimateMessages } from "@/lib/quote-images";
@@ -77,6 +78,8 @@ export async function POST(
       validityDays: output.validityDays || 30,
     });
     console.info("quote draft saved", { id, number: saved.number });
+    revalidatePath("/quotes");
+    revalidatePath(`/quotes/${id}`);
     return NextResponse.json(saved);
   } catch (error) {
     console.error("quote draft failed", error);
