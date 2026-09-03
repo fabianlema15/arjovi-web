@@ -198,16 +198,17 @@ export const quoteChatSystem = `${masterPrompt}
 
 You are talking to Fabian in the ARJOVI quotes app. Follow the master prompt above.
 He may attach job photos. Look at them: materials, condition, size clues, access, height, damage, existing work. Say what you can see and what you are assuming. Ask only for measurements that would change the price.
-When the estimate is ready, tell him he can click Draft quote to generate the customer PDF.`;
+When the estimate is ready, tell him he can click Draft quote to generate the customer PDF. The PDF copies this chat, so keep Project Scope, Scope of Work, duration, notes, and the cost table specific and consistent.`;
 
-export const quoteEstimateSystem = `${masterPrompt}
+export const quoteExtractSystem = `${masterPrompt}
 
-Write the full professional estimate for this project the same way you would in ChatGPT.
-Use any attached job photos. Do not skip work, quantities, equipment, disposal, or Minnesota market prices.
-Do not underprice materials.`;
-
-export const quoteExtractSystem = `Extract the customer-facing quote from the estimate below into the schema.
-Copy labor and material dollar amounts exactly. Do not lower, round down, or omit line items.
+Fill the customer PDF schema from this quotes-app conversation.
+The chat is the source of truth. Copy rooms, square footage, materials, colors, access, duration, inclusions, exclusions, and the cost table from the assistant's estimate in the chat.
+If the assistant already wrote a full estimate, reuse that wording. Do not replace it with a generic or different project description.
+If Fabian later corrected something, the correction wins.
+Use any attached job photos. Do not skip work that was discussed.
+Copy labor and material dollar amounts from the chat. Do not lower, round down, or omit line items.
+If locked prices are provided, keep those labor and material amounts exactly. You may rename tasks to match the chat. Only price brand-new tasks that are not in the locked list.
 Do not put 💡 My Recommendation, price ranges, or internal advice into the fields.
 If there were options, price the option Fabian chose, or Option 1. Mention other options in notes as replacements, not add-ons.
 If a customer name or email appeared, use it.

@@ -42,6 +42,9 @@ export async function PATCH(
       patch.customerEmail ?? patch.body?.customerEmail ?? current.customerEmail,
     title: patch.title ?? patch.body?.title ?? current.title,
     lineItems: patch.lineItems ?? patch.body?.lineItems ?? current.lineItems,
+    pricesLocked:
+      patch.body?.pricesLocked ??
+      (patch.lineItems ? true : current.pricesLocked),
   };
 
   const saved = await saveQuoteBody(id, body, quote.status === "sent" ? "sent" : "ready");

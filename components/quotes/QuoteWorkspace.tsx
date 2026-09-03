@@ -170,6 +170,11 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
     try {
       const response = await fetch(`/api/quotes/${quote.id}/draft`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keepPrices: Boolean(body.pricesLocked),
+          lineItems: body.lineItems,
+        }),
         signal: controller.signal,
       });
       const payload = (await response.json()) as {
@@ -186,7 +191,11 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
         setEmailTo(payload.body.customerEmail ?? "");
       }
       setStatus(payload.status ?? "ready");
-      setNotice("Quote drafted. Edit prices if needed, then download or send.");
+      setNotice(
+        payload.body?.pricesLocked
+          ? "Quote updated. Edited prices were kept."
+          : "Quote drafted. Edit prices if needed, then download or send."
+      );
     } catch (error) {
       setNotice(
         error instanceof DOMException && error.name === "AbortError"
@@ -211,7 +220,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
   }
 
   function onLineItems(items: QuoteLineItem[]) {
-    void persist({ ...body, lineItems: items });
+    void persist({ ...body, lineItems: items, pricesLocked: true });
   }
 
   async function sendEmail() {

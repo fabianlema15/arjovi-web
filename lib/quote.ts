@@ -26,6 +26,7 @@ export type QuoteBody = {
   paymentTerms: string[];
   validityDays: number;
   notes: string[];
+  pricesLocked?: boolean;
 };
 
 export function lineSubtotal(item: QuoteLineItem) {
@@ -62,6 +63,59 @@ export function formatMoney(value: number) {
     currency: "USD",
     maximumFractionDigits: 0,
   });
+}
+
+function lineKey(description: string) {
+  return description.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+export function keepLineItemPrices(
+  previous: QuoteLineItem[],
+  next: QuoteLineItem[]
+) {
+  if (!previous.length) {
+    return next;
+  }
+
+  const used = new Set<number>();
+  const assigned: (QuoteLineItem | null)[] = next.map(() => null);
+
+  next.forEach((item, index) => {
+    const want = lineKey(item.description);
+    const match = previous.findIndex(
+      (prior, priorIndex) =>
+        !used.has(priorIndex) && lineKey(prior.description) === want
+    );
+    if (match < 0) {
+      return;
+    }
+    used.add(match);
+    assigned[index] = {
+      ...item,
+      labor: previous[match].labor,
+      materials: previous[match].materials,
+    };
+  });
+
+  if (previous.length === next.length) {
+    next.forEach((item, index) => {
+      if (assigned[index]) {
+        return;
+      }
+      const match = previous.findIndex((_, priorIndex) => !used.has(priorIndex));
+      if (match < 0) {
+        return;
+      }
+      used.add(match);
+      assigned[index] = {
+        ...item,
+        labor: previous[match].labor,
+        materials: previous[match].materials,
+      };
+    });
+  }
+
+  return next.map((item, index) => assigned[index] ?? item);
 }
 
 export function emptyQuoteBody(): QuoteBody {
