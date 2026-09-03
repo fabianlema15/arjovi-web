@@ -79,14 +79,10 @@ Consider:
 - Equipment
 - Complexity
 💳 Payment Terms
-Normally use:
-- 40% deposit upon acceptance
-- 30% progress payment
-- 30% final payment
-For small jobs, you can instead recommend:
-- 50% deposit
-- 50% upon completion
-Choose whichever makes more sense.
+Always:
+- 25% deposit upon acceptance
+- 75% final payment upon completion
+Do not put dollar amounts in the payment terms. The app adds the amounts from the quote total.
 📅 Quote Validity
 This quote is valid for 30 days.
 ⚠️ Notes & Conditions

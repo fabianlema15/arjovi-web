@@ -27,9 +27,7 @@ export const quoteBodySchema = z.object({
   duration: z.string().describe("Estimated working days"),
   paymentTerms: z
     .array(z.string())
-    .describe(
-      "40% deposit, 30% progress, 30% final — or 50%/50% for a small job"
-    ),
+    .describe("Always 25% deposit upon acceptance and 75% final payment. No dollar amounts."),
   validityDays: z.number().describe("Usually 30"),
   notes: z
     .array(z.string())

@@ -48,6 +48,14 @@ export function roundMoney(value: number) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
+export function quotePayments(total: number) {
+  const deposit = roundMoney(total * 0.25);
+  return {
+    deposit,
+    remainder: roundMoney(total - deposit),
+  };
+}
+
 export function formatMoney(value: number) {
   return value.toLocaleString("en-US", {
     style: "currency",
@@ -66,9 +74,8 @@ export function emptyQuoteBody(): QuoteBody {
     lineItems: [],
     duration: "",
     paymentTerms: [
-      "40% deposit upon acceptance",
-      "30% progress payment",
-      "30% final payment upon completion",
+      "25% deposit upon acceptance",
+      "75% final payment upon completion",
     ],
     validityDays: 30,
     notes: [],

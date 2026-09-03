@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import { formatMoney, quoteTotals, type QuoteBody } from "@/lib/quote";
+import { formatMoney, quotePayments, quoteTotals, type QuoteBody } from "@/lib/quote";
 import { site } from "@/lib/site";
 
 function emojiSrc(name: string) {
@@ -92,6 +92,7 @@ type Props = {
 
 export function QuotePdfDocument({ number, date, body }: Props) {
   const totals = quoteTotals(body.lineItems);
+  const payments = quotePayments(totals.total);
 
   return (
     <Document>
@@ -163,11 +164,13 @@ export function QuotePdfDocument({ number, date, body }: Props) {
           </>
         ) : null}
         <Heading icon="payment" label="Payment Terms" />
-        {body.paymentTerms.map((term) => (
-          <Text key={term} style={styles.item}>
-            - {term}
-          </Text>
-        ))}
+        <Text style={styles.item}>
+          - 25% deposit upon acceptance: {formatMoney(payments.deposit)}
+        </Text>
+        <Text style={styles.item}>
+          - 75% final payment upon completion:{" "}
+          {formatMoney(payments.remainder)}
+        </Text>
         <Heading icon="validity" label="Quote Validity" />
         <Text style={styles.p}>
           This quote is valid for {body.validityDays || 30} days.
