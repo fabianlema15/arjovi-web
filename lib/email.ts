@@ -39,3 +39,51 @@ export async function sendLeadEmail(lead: LeadEmail) {
     throw new Error(error.message);
   }
 }
+
+function projectLabel(title: string) {
+  return title
+    .replace(/^[\p{Extended_Pictographic}\uFE0F\u200D]+\s*/u, "")
+    .trim();
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+export function quoteCustomerEmail(opts: {
+  number: number;
+  customerName: string;
+  title: string;
+}) {
+  const firstName = opts.customerName.trim().split(/\s+/)[0];
+  const hello = firstName ? `Hi ${firstName},` : "Hello,";
+  const project = projectLabel(opts.title);
+  const attached = project
+    ? `I’ve attached a PDF with our quote for ${project}.`
+    : "I’ve attached a PDF with our quote.";
+  const paragraphs = [
+    "Thank you for considering ARJOVI Solutions for your project.",
+    attached,
+    "Please take a look when you have a moment, and let me know if you have any questions or would like anything adjusted. I’m happy to walk through the details.",
+  ];
+  const signoff = [
+    site.owner,
+    site.legalName,
+    site.phone,
+    site.email,
+  ];
+
+  return {
+    subject: `Quote #${opts.number} from ${site.legalName}`,
+    text: [hello, "", ...paragraphs, "", ...signoff].join("\n"),
+    html: [
+      `<p>${escapeHtml(hello)}</p>`,
+      ...paragraphs.map((line) => `<p>${escapeHtml(line)}</p>`),
+      `<p>${signoff.map(escapeHtml).join("<br />")}</p>`,
+    ].join(""),
+  };
+}

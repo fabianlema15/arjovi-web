@@ -5,8 +5,9 @@ import { Resend } from "resend";
 import { QuotePdfDocument } from "@/components/quotes/QuotePdfDocument";
 import { quotes } from "@/db/schema";
 import { getDb } from "@/lib/db";
+import { quoteCustomerEmail } from "@/lib/email";
 import { requireQuoteCookie } from "@/lib/quote-auth";
-import { emptyQuoteBody, formatMoney, quoteTotals } from "@/lib/quote";
+import { emptyQuoteBody } from "@/lib/quote";
 import { getQuote, saveQuoteBody } from "@/lib/quotes-db";
 import { site } from "@/lib/site";
 
@@ -53,7 +54,11 @@ export async function POST(
   const pdf = await renderToBuffer(
     <QuotePdfDocument number={quote.number} date={date} body={body} />
   );
-  const totals = quoteTotals(body.lineItems);
+  const message = quoteCustomerEmail({
+    number: quote.number,
+    customerName: body.customerName,
+    title: body.title,
+  });
   const from =
     process.env.EMAIL_FROM ?? `${site.name} <beth.t@example.com>`;
 
@@ -62,12 +67,9 @@ export async function POST(
     from,
     to,
     replyTo: site.email,
-    subject: `Quote #${quote.number} from ${site.legalName}`,
-    text: [
-      `Quote #${quote.number} for ${body.customerName || "you"}.`,
-      body.title,
-      `Estimated total: ${formatMoney(totals.total)}`,
-    ].join("\n\n"),
+    subject: message.subject,
+    text: message.text,
+    html: message.html,
     attachments: [
       {
         filename: `Quote_${quote.number}.pdf`,
