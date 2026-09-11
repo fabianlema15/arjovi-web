@@ -58,13 +58,18 @@ export function quoteCustomerEmail(opts: {
   number: number;
   customerName: string;
   title: string;
+  revised?: boolean;
 }) {
   const firstName = opts.customerName.trim().split(/\s+/)[0];
   const hello = firstName ? `Hi ${firstName},` : "Hello,";
   const project = projectLabel(opts.title);
-  const attached = project
-    ? `I’ve attached a PDF with our quote for ${project}.`
-    : "I’ve attached a PDF with our quote.";
+  const attached = opts.revised
+    ? project
+      ? `I’ve attached an updated PDF for ${project}. This revised quote replaces the previous one.`
+      : "I’ve attached an updated PDF. This revised quote replaces the previous one."
+    : project
+      ? `I’ve attached a PDF with our quote for ${project}.`
+      : "I’ve attached a PDF with our quote.";
   const paragraphs = [
     "Thank you for considering ARJOVI Solutions for your project.",
     attached,
@@ -78,7 +83,9 @@ export function quoteCustomerEmail(opts: {
   ];
 
   return {
-    subject: `Quote #${opts.number} from ${site.legalName}`,
+    subject: opts.revised
+      ? `Revised quote #${opts.number} from ${site.legalName}`
+      : `Quote #${opts.number} from ${site.legalName}`,
     text: [hello, "", ...paragraphs, "", ...signoff].join("\n"),
     html: [
       `<p>${escapeHtml(hello)}</p>`,

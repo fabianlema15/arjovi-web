@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import { formatMoney, quotePayments, quoteTotals, type QuoteBody } from "@/lib/quote";
+import { formatMoney, quotePaymentLines, quoteTotals, type QuoteBody } from "@/lib/quote";
 import { site } from "@/lib/site";
 
 function emojiSrc(name: string) {
@@ -87,12 +87,13 @@ function Heading({ icon, label }: { icon: string; label: string }) {
 type Props = {
   number: number;
   date: string;
+  revisedDate?: string;
   body: QuoteBody;
 };
 
-export function QuotePdfDocument({ number, date, body }: Props) {
+export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
-  const payments = quotePayments(totals.total);
+  const payments = quotePaymentLines(totals.total);
 
   return (
     <Document>
@@ -103,6 +104,7 @@ export function QuotePdfDocument({ number, date, body }: Props) {
         <Text style={styles.contact}>{site.url.replace("https://", "")}</Text>
         <View style={styles.meta}>
           <Text>Date: {date}</Text>
+          {revisedDate ? <Text>Revised: {revisedDate}</Text> : null}
           <Text>Quote #: {number}</Text>
           <Text>To: {body.customerName || "Customer"}</Text>
         </View>
@@ -164,13 +166,11 @@ export function QuotePdfDocument({ number, date, body }: Props) {
           </>
         ) : null}
         <Heading icon="payment" label="Payment Terms" />
-        <Text style={styles.item}>
-          - 25% deposit upon acceptance: {formatMoney(payments.deposit)}
-        </Text>
-        <Text style={styles.item}>
-          - 75% final payment upon completion:{" "}
-          {formatMoney(payments.remainder)}
-        </Text>
+        {payments.map((line) => (
+          <Text key={line.label} style={styles.item}>
+            - {line.label}: {formatMoney(line.amount)}
+          </Text>
+        ))}
         <Heading icon="validity" label="Quote Validity" />
         <Text style={styles.p}>
           This quote is valid for {body.validityDays || 30} days.

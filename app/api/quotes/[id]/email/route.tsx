@@ -1,13 +1,11 @@
 import { renderToBuffer } from "@react-pdf/renderer";
-import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
 import { QuotePdfDocument } from "@/components/quotes/QuotePdfDocument";
-import { quotes } from "@/db/schema";
-import { getDb } from "@/lib/db";
 import { quoteCustomerEmail } from "@/lib/email";
 import { requireQuoteCookie } from "@/lib/quote-auth";
-import { emptyQuoteBody } from "@/lib/quote";
+import { emptyQuoteBody, quoteWasEmailed } from "@/lib/quote";
 import { getQuote, saveQuoteBody } from "@/lib/quotes-db";
 import { site } from "@/lib/site";
 
@@ -50,14 +48,22 @@ export async function POST(
     );
   }
 
+  const revised = quoteWasEmailed(quote.status);
   const date = quote.createdAt.toLocaleDateString("en-US");
+  const revisedDate = revised ? new Date().toLocaleDateString("en-US") : undefined;
   const pdf = await renderToBuffer(
-    <QuotePdfDocument number={quote.number} date={date} body={body} />
+    <QuotePdfDocument
+      number={quote.number}
+      date={date}
+      revisedDate={revisedDate}
+      body={body}
+    />
   );
   const message = quoteCustomerEmail({
     number: quote.number,
     customerName: body.customerName,
     title: body.title,
+    revised,
   });
   const from =
     process.env.EMAIL_FROM ?? `${site.name} <beth.t@example.com>`;
@@ -82,11 +88,21 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 502 });
   }
 
-  await saveQuoteBody(id, { ...body, customerEmail: to }, "sent");
-  await getDb()
-    .update(quotes)
-    .set({ customerEmail: to, status: "sent", updatedAt: new Date() })
-    .where(eq(quotes.id, id));
+  const saved = await saveQuoteBody(
+    id,
+    {
+      ...body,
+      customerEmail: to,
+      revisedAt: revised ? new Date().toISOString() : body.revisedAt,
+    },
+    revised ? "revised" : "sent"
+  );
+  revalidatePath("/quotes");
+  revalidatePath(`/quotes/${id}`);
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    status: saved.status,
+    body: saved.body,
+  });
 }

@@ -11,7 +11,7 @@ export const quoteBodySchema = z.object({
   projectScope: z
     .string()
     .describe(
-      "Copy the Project Scope from the chat/estimate. Keep rooms, sq ft, materials, colors, access, and assumptions. Do not invent a shorter or different job."
+      "Copy the Project Scope from the chat/estimate. Keep rooms, sq ft, materials, colors, access details that were stated, and exclusions. Do not invent a shorter or different job. Do not add assumptions or site-visit language."
     ),
   scopeOfWork: z.array(
     z.object({
@@ -35,11 +35,13 @@ export const quoteBodySchema = z.object({
     .describe("Copy the duration from the chat, including working days"),
   paymentTerms: z
     .array(z.string())
-    .describe("Always 25% deposit upon acceptance and 75% final payment. No dollar amounts."),
+    .describe(
+      "Payment labels only, no dollar amounts. Under $1000: 100% upon completion. Otherwise 10% deposit and 90% final."
+    ),
   validityDays: z.number().describe("Usually 30"),
   notes: z
     .array(z.string())
     .describe(
-      "Copy relevant assumptions and exclusions from the chat. Do not invent unrelated notes."
+      "Copy relevant exclusions from the chat. No assumptions, no site-visit language, no invented notes."
     ),
 });

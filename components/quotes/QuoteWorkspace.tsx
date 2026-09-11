@@ -7,6 +7,7 @@ import { QuotePreview } from "@/components/quotes/QuotePreview";
 import { QuotePriceTable } from "@/components/quotes/QuotePriceTable";
 import {
   emptyQuoteBody,
+  quoteWasEmailed,
   type QuoteAttachment,
   type QuoteBody,
   type QuoteLineItem,
@@ -230,13 +231,24 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ to: emailTo }),
     });
-    const payload = await response.json();
+    const payload = (await response.json()) as {
+      error?: string;
+      body?: QuoteBody;
+      status?: string;
+    };
     if (!response.ok) {
       setNotice(payload.error ?? "Send failed.");
       return;
     }
-    setStatus("sent");
-    setNotice("Quote emailed.");
+    if (payload.body) {
+      setBody(payload.body);
+    }
+    setStatus(payload.status ?? "sent");
+    setNotice(
+      payload.status === "revised"
+        ? "Revised quote emailed. This replaces the previous quote."
+        : "Quote emailed."
+    );
   }
 
   return (
@@ -381,7 +393,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
             type="button"
             onClick={() => void sendEmail()}
           >
-            Email quote
+            {quoteWasEmailed(status) ? "Email revised quote" : "Email quote"}
           </button>
         </div>
         {notice ? <p className="quotes-notice">{notice}</p> : null}
@@ -391,7 +403,18 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
           <>
             <h2 className="quotes-edit-heading">Edit prices</h2>
             <QuotePriceTable items={body.lineItems} onChange={onLineItems} />
-            <QuotePreview number={quote.number} date={date} body={body} />
+            <QuotePreview
+              number={quote.number}
+              date={date}
+              revisedDate={
+                quoteWasEmailed(status)
+                  ? new Date(body.revisedAt ?? Date.now()).toLocaleDateString(
+                      "en-US"
+                    )
+                  : undefined
+              }
+              body={body}
+            />
           </>
         ) : (
           <p className="quotes-empty">No quote document yet.</p>

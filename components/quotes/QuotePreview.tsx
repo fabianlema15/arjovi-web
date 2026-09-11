@@ -1,7 +1,7 @@
 import {
   formatMoney,
   lineSubtotal,
-  quotePayments,
+  quotePaymentLines,
   quoteTotals,
   type QuoteBody,
 } from "@/lib/quote";
@@ -11,12 +11,13 @@ import { site } from "@/lib/site";
 type Props = {
   number: number;
   date: string;
+  revisedDate?: string;
   body: QuoteBody;
 };
 
-export function QuotePreview({ number, date, body }: Props) {
+export function QuotePreview({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
-  const payments = quotePayments(totals.total);
+  const payments = quotePaymentLines(totals.total);
 
   return (
     <article className="quote-sheet">
@@ -28,6 +29,12 @@ export function QuotePreview({ number, date, body }: Props) {
       </header>
       <p className="quote-sheet-meta">
         Date: {date}
+        {revisedDate ? (
+          <>
+            <br />
+            Revised: {revisedDate}
+          </>
+        ) : null}
         <br />
         Quote #: {number}
         <br />
@@ -93,12 +100,11 @@ export function QuotePreview({ number, date, body }: Props) {
       ) : null}
       <h2>{quoteHeadings.payment}</h2>
       <ul>
-        <li>
-          25% deposit upon acceptance: {formatMoney(payments.deposit)}
-        </li>
-        <li>
-          75% final payment upon completion: {formatMoney(payments.remainder)}
-        </li>
+        {payments.map((line) => (
+          <li key={line.label}>
+            {line.label}: {formatMoney(line.amount)}
+          </li>
+        ))}
       </ul>
       <h2>{quoteHeadings.validity}</h2>
       <p>This quote is valid for {body.validityDays || 30} days.</p>

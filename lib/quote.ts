@@ -27,7 +27,12 @@ export type QuoteBody = {
   validityDays: number;
   notes: string[];
   pricesLocked?: boolean;
+  revisedAt?: string;
 };
+
+export function quoteWasEmailed(status: string) {
+  return status === "sent" || status === "revised";
+}
 
 export function lineSubtotal(item: QuoteLineItem) {
   return roundMoney(item.labor + item.materials);
@@ -49,16 +54,24 @@ export function roundMoney(value: number) {
   return Math.round((Number(value) || 0) * 100) / 100;
 }
 
-export function quotePayments(total: number) {
-  const deposit = roundMoney(total * 0.25);
-  return {
-    deposit,
-    remainder: roundMoney(total - deposit),
-  };
+export function roundDollars(value: number) {
+  return Math.round(Number(value) || 0);
+}
+
+export function quotePaymentLines(total: number) {
+  const whole = roundDollars(total);
+  if (whole < 1000) {
+    return [{ label: "100% upon completion", amount: whole }];
+  }
+  const deposit = roundDollars(whole * 0.1);
+  return [
+    { label: "10% deposit upon acceptance", amount: deposit },
+    { label: "90% final payment upon completion", amount: whole - deposit },
+  ];
 }
 
 export function formatMoney(value: number) {
-  return value.toLocaleString("en-US", {
+  return roundDollars(value).toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
@@ -128,8 +141,8 @@ export function emptyQuoteBody(): QuoteBody {
     lineItems: [],
     duration: "",
     paymentTerms: [
-      "25% deposit upon acceptance",
-      "75% final payment upon completion",
+      "10% deposit upon acceptance",
+      "90% final payment upon completion",
     ],
     validityDays: 30,
     notes: [],

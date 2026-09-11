@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { formatMoney, lineSubtotal, quoteTotals, type QuoteLineItem } from "@/lib/quote";
 
 type Props = {
@@ -7,20 +8,75 @@ type Props = {
   onChange: (items: QuoteLineItem[]) => void;
 };
 
+function parseMoney(text: string) {
+  const trimmed = text.trim();
+  if (trimmed === "") {
+    return 0;
+  }
+  const n = Number(trimmed);
+  if (!Number.isFinite(n) || n < 0) {
+    return 0;
+  }
+  return n;
+}
+
+function MoneyInput({
+  amount,
+  onCommit,
+}: {
+  amount: number;
+  onCommit: (value: number) => void;
+}) {
+  const [focused, setFocused] = useState(false);
+  const [text, setText] = useState(String(amount));
+
+  useEffect(() => {
+    if (!focused) {
+      setText(String(amount));
+    }
+  }, [amount, focused]);
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={focused ? text : String(amount)}
+      onFocus={() => {
+        setFocused(true);
+        setText(amount === 0 ? "" : String(amount));
+      }}
+      onChange={(event) => {
+        const next = event.target.value.replace(/[^\d.]/g, "");
+        setText(next);
+        if (next.trim() !== "") {
+          onCommit(parseMoney(next));
+        }
+      }}
+      onBlur={() => {
+        onCommit(parseMoney(text));
+        setFocused(false);
+      }}
+    />
+  );
+}
+
 export function QuotePriceTable({ items, onChange }: Props) {
   const totals = quoteTotals(items);
 
-  function update(index: number, field: "labor" | "materials" | "description", value: string) {
-    const next = items.map((item, itemIndex) => {
-      if (itemIndex !== index) {
-        return item;
-      }
-      if (field === "description") {
-        return { ...item, description: value };
-      }
-      return { ...item, [field]: Number(value) || 0 };
-    });
-    onChange(next);
+  function updateDescription(index: number, value: string) {
+    onChange(
+      items.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, description: value } : item
+      )
+    );
+  }
+
+  function updateMoney(index: number, field: "labor" | "materials", value: number) {
+    onChange(
+      items.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      )
+    );
   }
 
   return (
@@ -41,28 +97,20 @@ export function QuotePriceTable({ items, onChange }: Props) {
                 <input
                   value={item.description}
                   onChange={(event) =>
-                    update(index, "description", event.target.value)
+                    updateDescription(index, event.target.value)
                   }
                 />
               </td>
               <td>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={item.labor}
-                  onChange={(event) => update(index, "labor", event.target.value)}
+                <MoneyInput
+                  amount={item.labor}
+                  onCommit={(value) => updateMoney(index, "labor", value)}
                 />
               </td>
               <td>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={item.materials}
-                  onChange={(event) =>
-                    update(index, "materials", event.target.value)
-                  }
+                <MoneyInput
+                  amount={item.materials}
+                  onCommit={(value) => updateMoney(index, "materials", value)}
                 />
               </td>
               <td>{formatMoney(lineSubtotal(item))}</td>

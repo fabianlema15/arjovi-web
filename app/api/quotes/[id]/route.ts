@@ -6,7 +6,7 @@ import { requireQuoteCookie } from "@/lib/quote-auth";
 import { getDb } from "@/lib/db";
 import { getQuote, saveQuoteBody } from "@/lib/quotes-db";
 import type { QuoteBody, QuoteLineItem } from "@/lib/quote";
-import { emptyQuoteBody } from "@/lib/quote";
+import { emptyQuoteBody, quoteWasEmailed } from "@/lib/quote";
 
 type PatchBody = {
   customerName?: string;
@@ -47,7 +47,11 @@ export async function PATCH(
       (patch.lineItems ? true : current.pricesLocked),
   };
 
-  const saved = await saveQuoteBody(id, body, quote.status === "sent" ? "sent" : "ready");
+  const saved = await saveQuoteBody(
+    id,
+    body,
+    quoteWasEmailed(quote.status) ? quote.status : "ready"
+  );
   revalidatePath("/quotes");
   revalidatePath(`/quotes/${id}`);
   return NextResponse.json(saved);

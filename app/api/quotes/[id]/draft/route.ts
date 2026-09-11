@@ -10,6 +10,7 @@ import { quoteBodySchema } from "@/lib/quote-schema";
 import {
   emptyQuoteBody,
   keepLineItemPrices,
+  quoteWasEmailed,
   type QuoteBody,
   type QuoteLineItem,
 } from "@/lib/quote";
@@ -106,9 +107,14 @@ export async function POST(
       validityDays: output.validityDays || 30,
       lineItems,
       pricesLocked: keepPrices,
+      revisedAt: current.revisedAt,
     };
 
-    const saved = await saveQuoteBody(id, body);
+    const saved = await saveQuoteBody(
+      id,
+      body,
+      quoteWasEmailed(quote.status) ? quote.status : "ready"
+    );
     console.info("quote draft saved", { id, number: saved.number });
     revalidatePath("/quotes");
     revalidatePath(`/quotes/${id}`);
