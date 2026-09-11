@@ -7,7 +7,8 @@ import { QuotePreview } from "@/components/quotes/QuotePreview";
 import { QuotePriceTable } from "@/components/quotes/QuotePriceTable";
 import {
   emptyQuoteBody,
-  quoteWasEmailed,
+  quoteIsRevised,
+  quoteRevisionDate,
   type QuoteAttachment,
   type QuoteBody,
   type QuoteLineItem,
@@ -82,9 +83,6 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
   const [saving, setSaving] = useState(false);
   const [emailTo, setEmailTo] = useState(quote.body?.customerEmail ?? "");
   const [notice, setNotice] = useState("");
-  const [revisedPreviewDate] = useState(() =>
-    new Date().toLocaleDateString("en-US")
-  );
   const photoInput = useRef<HTMLInputElement>(null);
 
   const initialMessages = useMemo<UIMessage[]>(
@@ -227,6 +225,14 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
     void persist({ ...body, lineItems: items, pricesLocked: true });
   }
 
+  function onRevised(checked: boolean) {
+    void persist({
+      ...body,
+      revised: checked,
+      revisedAt: checked ? new Date().toISOString() : undefined,
+    });
+  }
+
   async function sendEmail() {
     setNotice("");
     const response = await fetch(`/api/quotes/${quote.id}/email`, {
@@ -247,11 +253,11 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
       setBody(payload.body);
     }
     setStatus(payload.status ?? "sent");
-    setNotice(
-      payload.status === "revised"
-        ? "Revised quote emailed. This replaces the previous quote."
-        : "Quote emailed."
-    );
+      setNotice(
+        quoteIsRevised(payload.body ?? body)
+          ? "Revised quote emailed. This replaces the previous quote."
+          : "Quote emailed."
+      );
   }
 
   return (
@@ -388,6 +394,14 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
               }
             />
           </label>
+          <label className="quotes-revised">
+            <input
+              type="checkbox"
+              checked={quoteIsRevised(body)}
+              onChange={(event) => onRevised(event.target.checked)}
+            />
+            Revised quote
+          </label>
           <a className="btn btn-ghost" href={`/api/quotes/${quote.id}/pdf`}>
             Download PDF
           </a>
@@ -396,7 +410,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
             type="button"
             onClick={() => void sendEmail()}
           >
-            {quoteWasEmailed(status) ? "Email revised quote" : "Email quote"}
+            {quoteIsRevised(body) ? "Email revised quote" : "Email quote"}
           </button>
         </div>
         {notice ? <p className="quotes-notice">{notice}</p> : null}
@@ -409,13 +423,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
             <QuotePreview
               number={quote.number}
               date={date}
-              revisedDate={
-                quoteWasEmailed(status)
-                  ? body.revisedAt
-                    ? new Date(body.revisedAt).toLocaleDateString("en-US")
-                    : revisedPreviewDate
-                  : undefined
-              }
+              revisedDate={quoteRevisionDate(body)}
               body={body}
             />
           </>

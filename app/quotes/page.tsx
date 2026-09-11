@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { QuotesNewButton } from "@/components/quotes/QuotesNewButton";
 import { listQuotes } from "@/lib/quotes-db";
-import { formatMoney, quoteTotals } from "@/lib/quote";
+import { formatMoney, quoteIsRevised, quoteTotals } from "@/lib/quote";
 import { site } from "@/lib/site";
 
 export default async function QuotesIndexPage() {
@@ -49,7 +49,11 @@ export default async function QuotesIndexPage() {
                       <Link href={`/quotes/${quote.id}`}>{quote.title}</Link>
                     </td>
                     <td>{total ? formatMoney(total) : "—"}</td>
-                    <td>{quote.status}</td>
+                    <td>
+                      {quote.body && quoteIsRevised(quote.body)
+                        ? "revised"
+                        : quote.status}
+                    </td>
                   </tr>
                 );
               })}

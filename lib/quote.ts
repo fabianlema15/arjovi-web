@@ -27,11 +27,39 @@ export type QuoteBody = {
   validityDays: number;
   notes: string[];
   pricesLocked?: boolean;
+  revised?: boolean;
   revisedAt?: string;
 };
 
 export function quoteWasEmailed(status: string) {
   return status === "sent" || status === "revised";
+}
+
+export function quoteIsRevised(body: QuoteBody) {
+  if (body.revised === false) {
+    return false;
+  }
+  return body.revised === true || Boolean(body.revisedAt);
+}
+
+export function quoteRevisionDate(body: QuoteBody) {
+  if (!quoteIsRevised(body) || !body.revisedAt) {
+    return undefined;
+  }
+  return new Date(body.revisedAt).toLocaleDateString("en-US");
+}
+
+export function nextQuoteStatus(current: string, body: QuoteBody) {
+  if (quoteIsRevised(body)) {
+    return "revised";
+  }
+  if (current === "revised") {
+    return "sent";
+  }
+  if (quoteWasEmailed(current)) {
+    return current;
+  }
+  return "ready";
 }
 
 export function lineSubtotal(item: QuoteLineItem) {

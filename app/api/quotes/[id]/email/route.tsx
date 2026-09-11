@@ -5,7 +5,7 @@ import { Resend } from "resend";
 import { QuotePdfDocument } from "@/components/quotes/QuotePdfDocument";
 import { quoteCustomerEmail } from "@/lib/email";
 import { requireQuoteCookie } from "@/lib/quote-auth";
-import { emptyQuoteBody, quoteWasEmailed } from "@/lib/quote";
+import { emptyQuoteBody, quoteIsRevised, quoteRevisionDate } from "@/lib/quote";
 import { getQuote, saveQuoteBody } from "@/lib/quotes-db";
 import { site } from "@/lib/site";
 
@@ -48,14 +48,13 @@ export async function POST(
     );
   }
 
-  const revised = quoteWasEmailed(quote.status);
+  const revised = quoteIsRevised(body);
   const date = quote.createdAt.toLocaleDateString("en-US");
-  const revisedDate = revised ? new Date().toLocaleDateString("en-US") : undefined;
   const pdf = await renderToBuffer(
     <QuotePdfDocument
       number={quote.number}
       date={date}
-      revisedDate={revisedDate}
+      revisedDate={quoteRevisionDate(body)}
       body={body}
     />
   );
@@ -93,9 +92,8 @@ export async function POST(
     {
       ...body,
       customerEmail: to,
-      revisedAt: revised ? new Date().toISOString() : body.revisedAt,
     },
-    revised ? "revised" : "sent"
+    quoteIsRevised(body) ? "revised" : "sent"
   );
   revalidatePath("/quotes");
   revalidatePath(`/quotes/${id}`);

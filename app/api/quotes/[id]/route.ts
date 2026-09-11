@@ -6,7 +6,7 @@ import { requireQuoteCookie } from "@/lib/quote-auth";
 import { getDb } from "@/lib/db";
 import { getQuote, saveQuoteBody } from "@/lib/quotes-db";
 import type { QuoteBody, QuoteLineItem } from "@/lib/quote";
-import { emptyQuoteBody, quoteWasEmailed } from "@/lib/quote";
+import { emptyQuoteBody, nextQuoteStatus } from "@/lib/quote";
 
 type PatchBody = {
   customerName?: string;
@@ -50,7 +50,7 @@ export async function PATCH(
   const saved = await saveQuoteBody(
     id,
     body,
-    quoteWasEmailed(quote.status) ? quote.status : "ready"
+    nextQuoteStatus(quote.status, body)
   );
   revalidatePath("/quotes");
   revalidatePath(`/quotes/${id}`);

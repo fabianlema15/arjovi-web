@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { QuotePdfDocument } from "@/components/quotes/QuotePdfDocument";
 import { requireQuoteCookie } from "@/lib/quote-auth";
 import { getQuote } from "@/lib/quotes-db";
-import { emptyQuoteBody, quoteWasEmailed } from "@/lib/quote";
+import { emptyQuoteBody, quoteRevisionDate } from "@/lib/quote";
 
 export const runtime = "nodejs";
 
@@ -28,15 +28,11 @@ export async function GET(
 
   const body = quote.body ?? emptyQuoteBody();
   const date = quote.createdAt.toLocaleDateString("en-US");
-  const revised = quoteWasEmailed(quote.status);
-  const revisedDate = revised
-    ? new Date(body.revisedAt ?? Date.now()).toLocaleDateString("en-US")
-    : undefined;
   const buffer = await renderToBuffer(
     <QuotePdfDocument
       number={quote.number}
       date={date}
-      revisedDate={revisedDate}
+      revisedDate={quoteRevisionDate(body)}
       body={body}
     />
   );
