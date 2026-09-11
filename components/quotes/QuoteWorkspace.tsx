@@ -82,6 +82,9 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
   const [saving, setSaving] = useState(false);
   const [emailTo, setEmailTo] = useState(quote.body?.customerEmail ?? "");
   const [notice, setNotice] = useState("");
+  const [revisedPreviewDate] = useState(() =>
+    new Date().toLocaleDateString("en-US")
+  );
   const photoInput = useRef<HTMLInputElement>(null);
 
   const initialMessages = useMemo<UIMessage[]>(
@@ -408,9 +411,9 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
               date={date}
               revisedDate={
                 quoteWasEmailed(status)
-                  ? new Date(body.revisedAt ?? Date.now()).toLocaleDateString(
-                      "en-US"
-                    )
+                  ? body.revisedAt
+                    ? new Date(body.revisedAt).toLocaleDateString("en-US")
+                    : revisedPreviewDate
                   : undefined
               }
               body={body}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { formatMoney, lineSubtotal, quoteTotals, type QuoteLineItem } from "@/lib/quote";
 
 type Props = {
@@ -28,13 +28,7 @@ function MoneyInput({
   onCommit: (value: number) => void;
 }) {
   const [focused, setFocused] = useState(false);
-  const [text, setText] = useState(String(amount));
-
-  useEffect(() => {
-    if (!focused) {
-      setText(String(amount));
-    }
-  }, [amount, focused]);
+  const [text, setText] = useState(amount === 0 ? "" : String(amount));
 
   return (
     <input
