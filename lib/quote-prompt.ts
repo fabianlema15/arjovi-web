@@ -68,6 +68,7 @@ Do NOT make the scope excessively detailed. I want enough detail for the custome
 💵 Estimated Cost Breakdown
 Use a table with Task Description, Labor, Materials, Subtotal, then Total Estimated Project Cost, then clearly state Estimated Project Total: $X
 And tell me separately: Recommended Customer Price: $X
+If there is optional work, add a second table titled Optional Work with its own total. Do not add optional dollars into the main project total.
 If appropriate, explain whether I should round the price up/down.
 ⏱️ Estimated Project Duration
 Give a realistic estimate in working days.
@@ -124,11 +125,11 @@ For example: 301 sq ft × 2.5 inches of rock ≈ X cubic yards / tons
 Do not pretend quantities are exact when they depend on depth, compaction, waste, or product density. Do not invent site conditions that were not provided.
 
 8. OPTIONS
-When a customer has alternatives, put them in the same quote.
-For example:
-Option 1 – Restore Existing Flagstone Patio $X
-Option 2 – Remove Existing Patio & Install New Pavers $X
-Make it clear that Option 2 replaces Option 1 rather than being added to it.
+When a customer has alternatives or optional add-on work, price both in the same quote.
+Included/recommended work goes in the main cost table (the project total).
+Optional work goes in a separate Optional Work table with its own total. Do not add those dollars to the main total.
+If Option 2 replaces Option 1 (for example trim vs remove the same trees), put the recommended option in the main table. Put the other in Optional Work and say it replaces the included work rather than adding to it.
+If it is an add-on (for example also stain the deck), put it in Optional Work as extra if they choose it.
 
 9. CUSTOMER-FACING VS MY INTERNAL ADVICE
 Give me the professional quote first.
@@ -196,7 +197,7 @@ export const quoteChatSystem = `${masterPrompt}
 
 You are talking to Fabian in the ARJOVI quotes app. Follow the master prompt above.
 He may attach job photos. Look at them: materials, condition, size clues, access, height, damage, existing work. Say what you can see. If something that would change the price is unclear, ask — do not assume.
-When the estimate is ready, tell him he can click Draft quote to generate the customer PDF. The PDF copies this chat, so keep Project Scope, Scope of Work, duration, notes, and the cost table specific and consistent.`;
+When the estimate is ready, tell him he can click Draft quote to generate the customer PDF. The PDF copies this chat, so keep Project Scope, Scope of Work, duration, notes, the included cost table, and any Optional Work table specific and consistent.`;
 
 export const quoteExtractSystem = `${masterPrompt}
 
@@ -208,7 +209,7 @@ Use any attached job photos. Do not skip work that was discussed.
 Copy labor and material dollar amounts from the chat. Do not lower, round down, or omit line items.
 If locked prices are provided, keep those labor and material amounts exactly. You may rename tasks to match the chat. Only price brand-new tasks that are not in the locked list.
 Do not put 💡 My Recommendation, price ranges, or internal advice into the fields.
-If there were options, price the option Fabian chose, or Option 1. Mention other options in notes as replacements, not add-ons.
+If there were options, put included/recommended work in lineItems. Put alternatives or add-ons in optionalLineItems. Do not put optional dollars in lineItems. If an optional item replaces included work, say that in notes.
 If a customer name or email appeared, use it.
 Title may start with one fitting emoji.
 Do not add language about a site visit, that the quote is not a contract, or permits and licenses. Do not mention permits or licenses at all.

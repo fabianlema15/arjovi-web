@@ -22,6 +22,7 @@ export type QuoteBody = {
   projectScope: string;
   scopeOfWork: QuoteSection[];
   lineItems: QuoteLineItem[];
+  optionalLineItems?: QuoteLineItem[];
   duration: string;
   paymentTerms: string[];
   validityDays: number;
@@ -66,6 +67,10 @@ export function lineSubtotal(item: QuoteLineItem) {
   return roundMoney(item.labor + item.materials);
 }
 
+export function quoteOptionalItems(body: QuoteBody) {
+  return body.optionalLineItems ?? [];
+}
+
 export function quoteTotals(items: QuoteLineItem[]) {
   const labor = roundMoney(items.reduce((sum, item) => sum + item.labor, 0));
   const materials = roundMoney(
@@ -97,6 +102,9 @@ export function quotePaymentLines(total: number) {
     { label: "90% final payment upon completion", amount: whole - deposit },
   ];
 }
+
+export const optionalWorkNote =
+  "Optional work is not included in the estimated project total. If an optional item replaces included work, choose one or the other.";
 
 export function formatMoney(value: number) {
   return roundDollars(value).toLocaleString("en-US", {
@@ -167,6 +175,7 @@ export function emptyQuoteBody(): QuoteBody {
     projectScope: "",
     scopeOfWork: [],
     lineItems: [],
+    optionalLineItems: [],
     duration: "",
     paymentTerms: [
       "10% deposit upon acceptance",

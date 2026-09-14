@@ -42,6 +42,8 @@ export async function PATCH(
       patch.customerEmail ?? patch.body?.customerEmail ?? current.customerEmail,
     title: patch.title ?? patch.body?.title ?? current.title,
     lineItems: patch.lineItems ?? patch.body?.lineItems ?? current.lineItems,
+    optionalLineItems:
+      patch.body?.optionalLineItems ?? current.optionalLineItems ?? [],
     pricesLocked:
       patch.body?.pricesLocked ??
       (patch.lineItems ? true : current.pricesLocked),

@@ -1191,6 +1191,12 @@ body.js-reveal .contact-layout > *.is-visible {
   font-weight: 700;
 }
 
+.quote-optional-note {
+  color: #444;
+  font-size: 0.92rem;
+  margin: 0 0 0.75rem;
+}
+
 @media (max-width: 900px) {
   .quotes-workspace,
   .quotes-toolbar {

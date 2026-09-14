@@ -6,6 +6,7 @@ import { formatMoney, lineSubtotal, quoteTotals, type QuoteLineItem } from "@/li
 type Props = {
   items: QuoteLineItem[];
   onChange: (items: QuoteLineItem[]) => void;
+  totalLabel?: string;
 };
 
 function parseMoney(text: string) {
@@ -54,7 +55,11 @@ function MoneyInput({
   );
 }
 
-export function QuotePriceTable({ items, onChange }: Props) {
+export function QuotePriceTable({
+  items,
+  onChange,
+  totalLabel = "Estimated Project Total",
+}: Props) {
   const totals = quoteTotals(items);
 
   function updateDescription(index: number, value: string) {
@@ -113,7 +118,7 @@ export function QuotePriceTable({ items, onChange }: Props) {
         </tbody>
         <tfoot>
           <tr>
-            <th>Estimated Project Total</th>
+            <th>{totalLabel}</th>
             <th>{formatMoney(totals.labor)}</th>
             <th>{formatMoney(totals.materials)}</th>
             <th>{formatMoney(totals.total)}</th>

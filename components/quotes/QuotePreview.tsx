@@ -1,6 +1,8 @@
 import {
   formatMoney,
   lineSubtotal,
+  optionalWorkNote,
+  quoteOptionalItems,
   quotePaymentLines,
   quoteTotals,
   type QuoteBody,
@@ -17,6 +19,8 @@ type Props = {
 
 export function QuotePreview({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
+  const optionalItems = quoteOptionalItems(body);
+  const optionalTotals = quoteTotals(optionalItems);
   const payments = quotePaymentLines(totals.total);
 
   return (
@@ -92,6 +96,45 @@ export function QuotePreview({ number, date, revisedDate, body }: Props) {
       <p className="quote-grand">
         Estimated Project Total: {formatMoney(totals.total)}
       </p>
+      {optionalItems.length ? (
+        <>
+          <h2>{quoteHeadings.optional}</h2>
+          <p className="quote-optional-note">{optionalWorkNote}</p>
+          <div className="quote-table-wrap">
+            <table className="quote-table">
+              <thead>
+                <tr>
+                  <th>Task Description</th>
+                  <th>Labor</th>
+                  <th>Materials</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {optionalItems.map((item) => (
+                  <tr key={item.description}>
+                    <td>{item.description}</td>
+                    <td>{formatMoney(item.labor)}</td>
+                    <td>{formatMoney(item.materials)}</td>
+                    <td>{formatMoney(lineSubtotal(item))}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Optional Work Total</th>
+                  <th>{formatMoney(optionalTotals.labor)}</th>
+                  <th>{formatMoney(optionalTotals.materials)}</th>
+                  <th>{formatMoney(optionalTotals.total)}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p className="quote-grand">
+            Optional Work Total: {formatMoney(optionalTotals.total)}
+          </p>
+        </>
+      ) : null}
       {body.duration ? (
         <>
           <h2>{quoteHeadings.duration}</h2>
@@ -106,6 +149,11 @@ export function QuotePreview({ number, date, revisedDate, body }: Props) {
           </li>
         ))}
       </ul>
+      {optionalItems.length ? (
+        <p className="quote-optional-note">
+          Payment amounts are based on the included project total.
+        </p>
+      ) : null}
       <h2>{quoteHeadings.validity}</h2>
       <p>This quote is valid for {body.validityDays || 30} days.</p>
       <h2>{quoteHeadings.notes}</h2>

@@ -8,6 +8,7 @@ import { QuotePriceTable } from "@/components/quotes/QuotePriceTable";
 import {
   emptyQuoteBody,
   quoteIsRevised,
+  quoteOptionalItems,
   quoteRevisionDate,
   type QuoteAttachment,
   type QuoteBody,
@@ -176,6 +177,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
         body: JSON.stringify({
           keepPrices: Boolean(body.pricesLocked),
           lineItems: body.lineItems,
+          optionalLineItems: quoteOptionalItems(body),
         }),
         signal: controller.signal,
       });
@@ -223,6 +225,10 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
 
   function onLineItems(items: QuoteLineItem[]) {
     void persist({ ...body, lineItems: items, pricesLocked: true });
+  }
+
+  function onOptionalLineItems(items: QuoteLineItem[]) {
+    void persist({ ...body, optionalLineItems: items, pricesLocked: true });
   }
 
   function onRevised(checked: boolean) {
@@ -420,6 +426,19 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
           <>
             <h2 className="quotes-edit-heading">Edit prices</h2>
             <QuotePriceTable items={body.lineItems} onChange={onLineItems} />
+            {quoteOptionalItems(body).length ? (
+              <>
+                <h2 className="quotes-edit-heading">Optional work</h2>
+                <p className="quotes-notice">
+                  Not included in the project total.
+                </p>
+                <QuotePriceTable
+                  items={quoteOptionalItems(body)}
+                  totalLabel="Optional Work Total"
+                  onChange={onOptionalLineItems}
+                />
+              </>
+            ) : null}
             <QuotePreview
               number={quote.number}
               date={date}

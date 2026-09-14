@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import { formatMoney, quotePaymentLines, quoteTotals, type QuoteBody } from "@/lib/quote";
+import { formatMoney, lineSubtotal, optionalWorkNote, quoteOptionalItems, quotePaymentLines, quoteTotals, type QuoteBody } from "@/lib/quote";
 import { site } from "@/lib/site";
 
 function emojiSrc(name: string) {
@@ -93,6 +93,8 @@ type Props = {
 
 export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
+  const optionalItems = quoteOptionalItems(body);
+  const optionalTotals = quoteTotals(optionalItems);
   const payments = quotePaymentLines(totals.total);
 
   return (
@@ -159,6 +161,43 @@ export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
         <Text style={styles.grand}>
           Estimated Project Total: {formatMoney(totals.total)}
         </Text>
+        {optionalItems.length ? (
+          <>
+            <Heading icon="cost" label="Optional Work" />
+            <Text style={styles.p}>{optionalWorkNote}</Text>
+            <View style={styles.tableHeader}>
+              <Text style={styles.colDesc}>Task Description</Text>
+              <Text style={styles.colNum}>Labor</Text>
+              <Text style={styles.colNum}>Materials</Text>
+              <Text style={styles.colNum}>Subtotal</Text>
+            </View>
+            {optionalItems.map((item) => (
+              <View key={item.description} style={styles.row}>
+                <Text style={styles.colDesc}>{item.description}</Text>
+                <Text style={styles.colNum}>{formatMoney(item.labor)}</Text>
+                <Text style={styles.colNum}>{formatMoney(item.materials)}</Text>
+                <Text style={styles.colNum}>
+                  {formatMoney(lineSubtotal(item))}
+                </Text>
+              </View>
+            ))}
+            <View style={styles.totalRow}>
+              <Text style={styles.colDesc}>Optional Work Total</Text>
+              <Text style={styles.colNum}>
+                {formatMoney(optionalTotals.labor)}
+              </Text>
+              <Text style={styles.colNum}>
+                {formatMoney(optionalTotals.materials)}
+              </Text>
+              <Text style={styles.colNum}>
+                {formatMoney(optionalTotals.total)}
+              </Text>
+            </View>
+            <Text style={styles.grand}>
+              Optional Work Total: {formatMoney(optionalTotals.total)}
+            </Text>
+          </>
+        ) : null}
         {body.duration ? (
           <>
             <Heading icon="duration" label="Estimated Project Duration" />
@@ -171,6 +210,11 @@ export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
             - {line.label}: {formatMoney(line.amount)}
           </Text>
         ))}
+        {optionalItems.length ? (
+          <Text style={styles.p}>
+            Payment amounts are based on the included project total.
+          </Text>
+        ) : null}
         <Heading icon="validity" label="Quote Validity" />
         <Text style={styles.p}>
           This quote is valid for {body.validityDays || 30} days.

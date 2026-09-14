@@ -11,6 +11,7 @@ import {
   emptyQuoteBody,
   keepLineItemPrices,
   nextQuoteStatus,
+  quoteOptionalItems,
   type QuoteBody,
   type QuoteLineItem,
 } from "@/lib/quote";
@@ -22,6 +23,7 @@ export const maxDuration = 120;
 type DraftRequest = {
   keepPrices?: boolean;
   lineItems?: QuoteLineItem[];
+  optionalLineItems?: QuoteLineItem[];
 };
 
 export async function POST(
@@ -50,11 +52,15 @@ export async function POST(
   const current = quote.body ?? emptyQuoteBody();
   let keepPrices = Boolean(current.pricesLocked);
   let editedItems = current.lineItems;
+  let editedOptional = quoteOptionalItems(current);
   try {
     const payload = (await request.json()) as DraftRequest;
     keepPrices = Boolean(payload.keepPrices || current.pricesLocked);
     if (payload.lineItems?.length) {
       editedItems = payload.lineItems;
+    }
+    if (payload.optionalLineItems?.length) {
+      editedOptional = payload.optionalLineItems;
     }
   } catch {
     // No JSON body — use the saved quote.
@@ -87,6 +93,7 @@ export async function POST(
             quote: current,
             keepPrices,
             editedItems,
+            editedOptional,
             customerName: quote.customerName || current.customerName,
             customerEmail: quote.customerEmail || current.customerEmail,
           }),
@@ -99,6 +106,12 @@ export async function POST(
     const lineItems = keepPrices
       ? keepLineItemPrices(editedItems, output.lineItems)
       : output.lineItems;
+    const optionalLineItems = keepPrices
+      ? keepLineItemPrices(
+          editedOptional,
+          output.optionalLineItems ?? []
+        )
+      : (output.optionalLineItems ?? []);
 
     const body: QuoteBody = {
       ...output,
@@ -106,6 +119,7 @@ export async function POST(
       customerEmail: output.customerEmail || current.customerEmail,
       validityDays: output.validityDays || 30,
       lineItems,
+      optionalLineItems,
       pricesLocked: keepPrices,
       revised: current.revised,
       revisedAt: current.revisedAt,
@@ -133,18 +147,21 @@ function draftInstructions({
   quote,
   keepPrices,
   editedItems,
+  editedOptional,
   customerName,
   customerEmail,
 }: {
   quote: QuoteBody;
   keepPrices: boolean;
   editedItems: QuoteLineItem[];
+  editedOptional: QuoteLineItem[];
   customerName: string;
   customerEmail: string;
 }) {
   const parts = [
     "Fill the customer PDF schema from this conversation.",
-    "Copy Project Scope, Scope of Work, duration, notes, and the cost table from the chat. Do not invent a different job.",
+    "Copy Project Scope, Scope of Work, duration, notes, the included cost table, and any Optional Work table from the chat. Do not invent a different job.",
+    "Included work goes in lineItems. Optional alternatives or add-ons go in optionalLineItems and must not be added into the main total.",
     `Current customer name: ${customerName}`,
     `Current customer email: ${customerEmail}`,
   ];
@@ -158,6 +175,7 @@ function draftInstructions({
           duration: quote.duration,
           notes: quote.notes,
           lineItems: quote.lineItems,
+          optionalLineItems: quoteOptionalItems(quote),
         }
       )}`
     );
@@ -166,6 +184,13 @@ function draftInstructions({
     parts.push(
       `LOCKED PRICES — keep these labor and materials exactly. Rename tasks only if the chat did. Price only brand-new tasks not listed here:\n${JSON.stringify(
         editedItems
+      )}`
+    );
+  }
+  if (keepPrices && editedOptional.length) {
+    parts.push(
+      `LOCKED OPTIONAL PRICES — keep these labor and materials exactly:\n${JSON.stringify(
+        editedOptional
       )}`
     );
   }

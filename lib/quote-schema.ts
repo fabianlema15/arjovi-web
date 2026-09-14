@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const quoteLineSchema = z.object({
+  description: z.string().describe("Task name from the chat cost table"),
+  labor: z.number().describe("Labor in USD, copied from the chat"),
+  materials: z.number().describe("Materials in USD, copied from the chat"),
+});
+
 export const quoteBodySchema = z.object({
   customerName: z.string(),
   customerEmail: z.string(),
@@ -19,29 +25,28 @@ export const quoteBodySchema = z.object({
       items: z.array(z.string()),
     })
   ).describe(
-    "Copy Scope of Work sections from the chat. Keep the same tasks, rooms, and materials. Do not drop discussed work."
+    "Copy Scope of Work sections from the chat. Keep the same tasks, rooms, and materials. Do not drop discussed work. Optional alternatives can be a separate Optional section."
   ),
-  lineItems: z.array(
-    z.object({
-      description: z
-        .string()
-        .describe("Task name from the chat cost table"),
-      labor: z.number().describe("Labor in USD, copied from the chat"),
-      materials: z.number().describe("Materials in USD, copied from the chat"),
-    })
-  ),
+  lineItems: z
+    .array(quoteLineSchema)
+    .describe("Included work only. This table is the project total."),
+  optionalLineItems: z
+    .array(quoteLineSchema)
+    .describe(
+      "Optional alternatives or add-ons. Empty if none. Do not duplicate these in lineItems. Not part of the project total."
+    ),
   duration: z
     .string()
     .describe("Copy the duration from the chat, including working days"),
   paymentTerms: z
     .array(z.string())
     .describe(
-      "Payment labels only, no dollar amounts. Under $1000: 100% upon completion. Otherwise 10% deposit and 90% final."
+      "Payment labels only, no dollar amounts. Under $1000: 100% upon completion. Otherwise 10% deposit and 90% final. Based on the included total only."
     ),
   validityDays: z.number().describe("Usually 30"),
   notes: z
     .array(z.string())
     .describe(
-      "Copy relevant exclusions from the chat. No assumptions, no site-visit language, no invented notes."
+      "Copy relevant exclusions from the chat. If there is optional work, note that it is not included unless chosen, and whether it replaces included work. No assumptions, no site-visit language."
     ),
 });
