@@ -34,6 +34,12 @@ export async function PATCH(
 
   const patch = (await request.json()) as PatchBody;
   const current = quote.body ?? emptyQuoteBody();
+  const lineItems = patch.lineItems ?? patch.body?.lineItems ?? current.lineItems;
+  const optionalLineItems =
+    patch.body?.optionalLineItems ?? current.optionalLineItems ?? [];
+  const pricesChanged =
+    priceKey(lineItems) !== priceKey(current.lineItems) ||
+    priceKey(optionalLineItems) !== priceKey(current.optionalLineItems ?? []);
   const body: QuoteBody = {
     ...current,
     ...(patch.body ?? {}),
@@ -41,12 +47,12 @@ export async function PATCH(
     customerEmail:
       patch.customerEmail ?? patch.body?.customerEmail ?? current.customerEmail,
     title: patch.title ?? patch.body?.title ?? current.title,
-    lineItems: patch.lineItems ?? patch.body?.lineItems ?? current.lineItems,
-    optionalLineItems:
-      patch.body?.optionalLineItems ?? current.optionalLineItems ?? [],
-    pricesLocked:
-      patch.body?.pricesLocked ??
-      (patch.lineItems ? true : current.pricesLocked),
+    lineItems,
+    optionalLineItems,
+    pricesLocked: pricesChanged ? true : current.pricesLocked,
+    pricesEditedAt: pricesChanged
+      ? new Date().toISOString()
+      : current.pricesEditedAt,
   };
 
   const saved = await saveQuoteBody(
@@ -57,6 +63,10 @@ export async function PATCH(
   revalidatePath("/quotes");
   revalidatePath(`/quotes/${id}`);
   return NextResponse.json(saved);
+}
+
+function priceKey(items: QuoteLineItem[]) {
+  return JSON.stringify(items.map((item) => [item.labor, item.materials]));
 }
 
 export async function DELETE(

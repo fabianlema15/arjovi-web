@@ -10,6 +10,7 @@ import { quoteBodySchema } from "@/lib/quote-schema";
 import {
   emptyQuoteBody,
   keepLineItemPrices,
+  mergeSplitLines,
   nextQuoteStatus,
   quoteOptionalItems,
   type QuoteBody,
@@ -21,7 +22,6 @@ export const runtime = "nodejs";
 export const maxDuration = 120;
 
 type DraftRequest = {
-  keepPrices?: boolean;
   lineItems?: QuoteLineItem[];
   optionalLineItems?: QuoteLineItem[];
 };
@@ -50,12 +50,10 @@ export async function POST(
   }
 
   const current = quote.body ?? emptyQuoteBody();
-  let keepPrices = Boolean(current.pricesLocked);
   let editedItems = current.lineItems;
   let editedOptional = quoteOptionalItems(current);
   try {
     const payload = (await request.json()) as DraftRequest;
-    keepPrices = Boolean(payload.keepPrices || current.pricesLocked);
     if (payload.lineItems?.length) {
       editedItems = payload.lineItems;
     }
@@ -74,7 +72,19 @@ export async function POST(
     );
   }
 
-  console.info("quote draft started", { id, messages: history.length });
+  const editedAt = current.pricesEditedAt
+    ? new Date(current.pricesEditedAt).getTime()
+    : 0;
+  const chatChangedSinceEdit = history.some(
+    (message) => message.createdAt.getTime() > editedAt
+  );
+  const keepPrices = Boolean(current.pricesLocked) && !chatChangedSinceEdit;
+
+  console.info("quote draft started", {
+    id,
+    messages: history.length,
+    keepPrices,
+  });
 
   try {
     const { output } = await generateText({
@@ -103,15 +113,14 @@ export async function POST(
       timeout: 90_000,
     });
 
+    const draftedItems = mergeSplitLines(output.lineItems);
+    const draftedOptional = mergeSplitLines(output.optionalLineItems ?? []);
     const lineItems = keepPrices
-      ? keepLineItemPrices(editedItems, output.lineItems)
-      : output.lineItems;
+      ? keepLineItemPrices(editedItems, draftedItems)
+      : draftedItems;
     const optionalLineItems = keepPrices
-      ? keepLineItemPrices(
-          editedOptional,
-          output.optionalLineItems ?? []
-        )
-      : (output.optionalLineItems ?? []);
+      ? keepLineItemPrices(editedOptional, draftedOptional)
+      : draftedOptional;
 
     const body: QuoteBody = {
       ...output,
@@ -121,6 +130,7 @@ export async function POST(
       lineItems,
       optionalLineItems,
       pricesLocked: keepPrices,
+      pricesEditedAt: keepPrices ? current.pricesEditedAt : undefined,
       revised: current.revised,
       revisedAt: current.revisedAt,
     };
@@ -167,7 +177,7 @@ function draftInstructions({
   ];
   if (quote.projectScope || quote.lineItems.length) {
     parts.push(
-      `Current quote JSON — keep facts unless the chat corrected them:\n${JSON.stringify(
+      `Current quote JSON (prices may include Fabian's manual edits). Keep it unless a later chat message changed a task or price; the latest chat message wins. Drop tasks the chat removed:\n${JSON.stringify(
         {
           title: quote.title,
           projectScope: quote.projectScope,

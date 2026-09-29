@@ -1,3 +1,5 @@
+import type { QuoteLineItem } from "@/lib/quote";
+
 const masterPrompt = `MASTER PROMPT — ARJOVI Solutions Construction Estimator
 I want you to act as my construction, handyman, landscaping, remodeling, and painting estimator for my business, ARJOVI Solutions LLC, located in Minnesota.
 
@@ -48,6 +50,7 @@ If there is uncertainty, give me a reasonable range and then tell me what price 
 For the cost breakdown, use:
 Task Description, Labor, Materials, Subtotal
 Do not combine labor and materials unless there is a good reason.
+Each task is one row with its labor and materials in their own columns. Never list the same task twice, once for labor and once for materials.
 Include equipment/disposal in either labor or materials as appropriate, or create a separate line when significant.
 
 4. QUOTE FORMAT
@@ -197,7 +200,25 @@ export const quoteChatSystem = `${masterPrompt}
 
 You are talking to Fabian in the ARJOVI quotes app. Follow the master prompt above.
 He may attach job photos. Look at them: materials, condition, size clues, access, height, damage, existing work. Say what you can see. If something that would change the price is unclear, ask — do not assume.
-When the estimate is ready, tell him he can click Draft quote to generate the customer PDF. The PDF copies this chat, so keep Project Scope, Scope of Work, duration, notes, the included cost table, and any Optional Work table specific and consistent.`;
+When the estimate is ready, tell him he can click Draft quote to generate the customer PDF. The PDF copies this chat, so keep Project Scope, Scope of Work, duration, notes, the included cost table, and any Optional Work table specific and consistent.
+Whenever you add, remove, rename, or reprice a task, restate the full updated cost table (and Optional Work table if any), not just the changed line.`;
+
+export function quoteChatContext(lineItems: QuoteLineItem[], optional: QuoteLineItem[]) {
+  if (!lineItems.length && !optional.length) {
+    return "";
+  }
+  const rows = (items: QuoteLineItem[]) =>
+    items
+      .map((item) => `- ${item.description}: labor $${item.labor}, materials $${item.materials}`)
+      .join("\n");
+  return [
+    "",
+    "CURRENT QUOTE TABLE IN THE APP. Fabian may have edited these prices by hand. Treat them as the current prices, not your earlier numbers, unless he asks to change them.",
+    "Included work:",
+    rows(lineItems) || "- (none)",
+    optional.length ? `Optional work:\n${rows(optional)}` : "",
+  ].join("\n");
+}
 
 export const quoteExtractSystem = `${masterPrompt}
 

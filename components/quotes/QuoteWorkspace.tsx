@@ -175,7 +175,6 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          keepPrices: Boolean(body.pricesLocked),
           lineItems: body.lineItems,
           optionalLineItems: quoteOptionalItems(body),
         }),

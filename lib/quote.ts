@@ -28,6 +28,7 @@ export type QuoteBody = {
   validityDays: number;
   notes: string[];
   pricesLocked?: boolean;
+  pricesEditedAt?: string;
   revised?: boolean;
   revisedAt?: string;
 };
@@ -118,6 +119,65 @@ function lineKey(description: string) {
   return description.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
+const splitWords =
+  /\b(labor|labour|materials?|supplies|parts|costs?)\b/g;
+
+function baseTask(description: string) {
+  return lineKey(description.replace(/\([^)]*\)/g, " "))
+    .replace(splitWords, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripSplitSuffix(description: string) {
+  return description
+    .replace(/\s*\((labor|labour|materials?|supplies)\)\s*$/i, "")
+    .replace(/\s*[-–—:]?\s+(labor|labour|materials?|supplies)\s*$/i, "")
+    .trim();
+}
+
+export function mergeSplitLines(items: QuoteLineItem[]) {
+  const merged: QuoteLineItem[] = [];
+  const used = new Set<number>();
+
+  items.forEach((item, index) => {
+    if (used.has(index)) {
+      return;
+    }
+    const laborOnly = item.labor > 0 && item.materials === 0;
+    const materialsOnly = item.materials > 0 && item.labor === 0;
+    if (!laborOnly && !materialsOnly) {
+      merged.push(item);
+      return;
+    }
+    const key = baseTask(item.description);
+    const partner = items.findIndex(
+      (other, otherIndex) =>
+        otherIndex !== index &&
+        !used.has(otherIndex) &&
+        baseTask(other.description) === key &&
+        (laborOnly
+          ? other.materials > 0 && other.labor === 0
+          : other.labor > 0 && other.materials === 0)
+    );
+    if (!key || partner < 0) {
+      merged.push(item);
+      return;
+    }
+    used.add(partner);
+    const other = items[partner];
+    merged.push({
+      description: stripSplitSuffix(
+        laborOnly ? item.description : other.description
+      ),
+      labor: item.labor + other.labor,
+      materials: item.materials + other.materials,
+    });
+  });
+
+  return merged;
+}
+
 export function keepLineItemPrices(
   previous: QuoteLineItem[],
   next: QuoteLineItem[]
@@ -145,24 +205,6 @@ export function keepLineItemPrices(
       materials: previous[match].materials,
     };
   });
-
-  if (previous.length === next.length) {
-    next.forEach((item, index) => {
-      if (assigned[index]) {
-        return;
-      }
-      const match = previous.findIndex((_, priorIndex) => !used.has(priorIndex));
-      if (match < 0) {
-        return;
-      }
-      used.add(match);
-      assigned[index] = {
-        ...item,
-        labor: previous[match].labor,
-        materials: previous[match].materials,
-      };
-    });
-  }
 
   return next.map((item, index) => assigned[index] ?? item);
 }

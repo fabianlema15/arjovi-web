@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { openaiErrorMessage } from "@/lib/openai-error";
 import { requireQuoteCookie } from "@/lib/quote-auth";
 import { quoteModel } from "@/lib/quote-model";
-import { quoteChatSystem } from "@/lib/quote-prompt";
+import { quoteChatContext, quoteChatSystem } from "@/lib/quote-prompt";
+import { quoteOptionalItems } from "@/lib/quote";
 import { fileParts } from "@/lib/quote-images";
 import { addMessage, getQuote } from "@/lib/quotes-db";
 
@@ -57,7 +58,11 @@ export async function POST(
 
   const result = streamText({
     model: quoteModel,
-    system: quoteChatSystem,
+    system:
+      quoteChatSystem +
+      (quote.body
+        ? quoteChatContext(quote.body.lineItems, quoteOptionalItems(quote.body))
+        : ""),
     messages: await convertToModelMessages(messages),
     abortSignal: request.signal,
     maxRetries: 0,

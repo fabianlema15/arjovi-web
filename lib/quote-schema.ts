@@ -1,7 +1,11 @@
 import { z } from "zod";
 
 const quoteLineSchema = z.object({
-  description: z.string().describe("Task name from the chat cost table"),
+  description: z
+    .string()
+    .describe(
+      "Task name from the chat cost table. One row per task with both labor and materials. Never split a task into a labor row and a materials row."
+    ),
   labor: z.number().describe("Labor in USD, copied from the chat"),
   materials: z.number().describe("Materials in USD, copied from the chat"),
 });
