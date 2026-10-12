@@ -58,6 +58,21 @@ export const services = [
 
 export const gallery = [
   {
+    src: "/assets/gallery/fence-line-cleanup.jpg",
+    caption: "Fence line cleared, rock refreshed",
+    alt: "Before and after of an overgrown fence line cleared with fresh rock along a stamped patio",
+  },
+  {
+    src: "/assets/gallery/tree-removal.jpg",
+    caption: "Tree removal",
+    alt: "Before and after of a large tree removed from a front yard",
+  },
+  {
+    src: "/assets/gallery/paver-walkway.jpg",
+    caption: "Paver walkway",
+    alt: "Before and after of a muddy lawn strip replaced with a paver walkway",
+  },
+  {
     src: "/assets/gallery/duplex-exterior-painting.jpg",
     caption: "Duplex exterior painting",
     alt: "Before and after of a duplex painted teal with white trim",
