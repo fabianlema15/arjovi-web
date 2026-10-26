@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { QuoteWorkspace } from "@/components/quotes/QuoteWorkspace";
+import { QuotesStaffNav } from "@/components/quotes/QuotesStaffNav";
 import { getQuote, listMessages } from "@/lib/quotes-db";
-import { site } from "@/lib/site";
 
 export default async function QuoteDetailPage({
   params,
@@ -18,18 +17,7 @@ export default async function QuoteDetailPage({
 
   return (
     <main className="quotes-app">
-      <header className="quotes-nav">
-        <p>
-          <Link href="/quotes">{site.legalName}</Link>
-          {" / "}
-          Quote #{quote.number}
-        </p>
-        <form action="/api/quotes/logout" method="post">
-          <button className="btn btn-ghost" type="submit">
-            Log out
-          </button>
-        </form>
-      </header>
+      <QuotesStaffNav current="quotes" crumb={`Quote #${quote.number}`} />
       <QuoteWorkspace
         quote={{
           id: quote.id,

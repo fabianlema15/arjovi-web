@@ -1,26 +1,20 @@
 import Link from "next/link";
 import { QuotesNewButton } from "@/components/quotes/QuotesNewButton";
+import { QuotesStaffNav } from "@/components/quotes/QuotesStaffNav";
 import { listQuotes } from "@/lib/quotes-db";
 import { formatMoney, quoteIsRevised, quoteTotals } from "@/lib/quote";
-import { site } from "@/lib/site";
 
 export default async function QuotesIndexPage() {
   const rows = await listQuotes();
 
   return (
     <main className="quotes-app">
-      <header className="quotes-nav">
-        <p>{site.legalName} quotes</p>
-        <div className="quotes-nav-actions">
-          <QuotesNewButton />
-          <form action="/api/quotes/logout" method="post">
-            <button className="btn btn-ghost" type="submit">
-              Log out
-            </button>
-          </form>
-        </div>
-      </header>
+      <QuotesStaffNav current="quotes" />
       <div className="quotes-list-wrap">
+        <div className="quotes-project-toolbar">
+          <p className="quotes-notice">Create a quote and paste the job details.</p>
+          <QuotesNewButton />
+        </div>
         {rows.length === 0 ? (
           <p>No quotes yet. Create one and paste the job details.</p>
         ) : (

@@ -129,6 +129,7 @@ export async function POST(
       validityDays: output.validityDays || 30,
       lineItems,
       optionalLineItems,
+      photos: current.photos ?? [],
       pricesLocked: keepPrices,
       pricesEditedAt: keepPrices ? current.pricesEditedAt : undefined,
       revised: current.revised,

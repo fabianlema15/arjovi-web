@@ -9,10 +9,12 @@ import {
   emptyQuoteBody,
   quoteIsRevised,
   quoteOptionalItems,
+  quotePhotos,
   quoteRevisionDate,
   type QuoteAttachment,
   type QuoteBody,
   type QuoteLineItem,
+  type QuotePhoto,
 } from "@/lib/quote";
 
 type SavedMessage = {
@@ -35,7 +37,10 @@ type Props = {
   messages: SavedMessage[];
 };
 
-const maxPhotos = 4;
+const maxChatPhotos = 4;
+const maxQuotePhotos = 6;
+const maxCaptionLength = 120;
+const quotePhotoMaxBytes = 280_000;
 
 function PhotoThumb({ file, onRemove }: { file: File; onRemove: () => void }) {
   const url = useMemo(() => URL.createObjectURL(file), [file]);
@@ -50,28 +55,82 @@ function PhotoThumb({ file, onRemove }: { file: File; onRemove: () => void }) {
   );
 }
 
-async function compressPhoto(file: File) {
+function canvasToJpeg(
+  canvas: HTMLCanvasElement,
+  quality: number
+): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+}
+
+async function compressPhoto(
+  file: File,
+  options: { maxEdge: number; maxBytes: number; qualities: number[] }
+) {
   const bitmap = await createImageBitmap(file);
-  const maxEdge = 1600;
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-  const width = Math.round(bitmap.width * scale);
-  const height = Math.round(bitmap.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return file;
-  }
-  context.drawImage(bitmap, 0, 0, width, height);
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", 0.82)
+  const edges = [options.maxEdge, 1280, 1024, 800, 640].filter(
+    (edge, index, list) => edge <= options.maxEdge && list.indexOf(edge) === index
   );
-  if (!blob) {
+  let best: Blob | null = null;
+
+  for (const maxEdge of edges) {
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      break;
+    }
+    context.drawImage(bitmap, 0, 0, width, height);
+
+    for (const quality of options.qualities) {
+      const blob = await canvasToJpeg(canvas, quality);
+      if (!blob) {
+        continue;
+      }
+      best = blob;
+      if (blob.size <= options.maxBytes) {
+        bitmap.close();
+        return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+          type: "image/jpeg",
+        });
+      }
+    }
+  }
+
+  bitmap.close();
+  if (!best) {
     return file;
   }
-  return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), {
+  return new File([best], file.name.replace(/\.\w+$/, ".jpg"), {
     type: "image/jpeg",
+  });
+}
+
+function compressChatPhoto(file: File) {
+  return compressPhoto(file, {
+    maxEdge: 1600,
+    maxBytes: 450_000,
+    qualities: [0.8, 0.7, 0.58],
+  });
+}
+
+function compressQuotePhoto(file: File) {
+  return compressPhoto(file, {
+    maxEdge: 1280,
+    maxBytes: quotePhotoMaxBytes,
+    qualities: [0.72, 0.6, 0.5, 0.4, 0.32],
+  });
+}
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error("Read failed"));
+    reader.readAsDataURL(file);
   });
 }
 
@@ -82,9 +141,11 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
   const [photos, setPhotos] = useState<File[]>([]);
   const [drafting, setDrafting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addingQuotePhotos, setAddingQuotePhotos] = useState(false);
   const [emailTo, setEmailTo] = useState(quote.body?.customerEmail ?? "");
   const [notice, setNotice] = useState("");
   const photoInput = useRef<HTMLInputElement>(null);
+  const quotePhotoInput = useRef<HTMLInputElement>(null);
 
   const initialMessages = useMemo<UIMessage[]>(
     () =>
@@ -137,12 +198,68 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
     const incoming = [...list].filter((file) => file.type.startsWith("image/"));
     const next = [...photos];
     for (const file of incoming) {
-      if (next.length >= maxPhotos) {
+      if (next.length >= maxChatPhotos) {
         break;
       }
-      next.push(await compressPhoto(file));
+      next.push(await compressChatPhoto(file));
     }
     setPhotos(next);
+  }
+
+  async function addQuotePhotos(list: FileList | File[]) {
+    const incoming = [...list].filter((file) => file.type.startsWith("image/"));
+    if (!incoming.length) {
+      return;
+    }
+    setAddingQuotePhotos(true);
+    setNotice("");
+    try {
+      const current = quotePhotos(body);
+      const added: QuotePhoto[] = [];
+      for (const file of incoming) {
+        if (current.length + added.length >= maxQuotePhotos) {
+          break;
+        }
+        const compressed = await compressQuotePhoto(file);
+        added.push({
+          id: crypto.randomUUID(),
+          mediaType: compressed.type || "image/jpeg",
+          url: await fileToDataUrl(compressed),
+          caption: "",
+        });
+      }
+      if (!added.length) {
+        setNotice(`You can attach up to ${maxQuotePhotos} photos on the quote.`);
+        return;
+      }
+      await persist({ ...body, photos: [...current, ...added] });
+    } catch {
+      setNotice("Could not add quote photos.");
+    } finally {
+      setAddingQuotePhotos(false);
+    }
+  }
+
+  function removeQuotePhoto(id: string) {
+    void persist({
+      ...body,
+      photos: quotePhotos(body).filter((photo) => photo.id !== id),
+    });
+  }
+
+  function updateQuotePhotoCaption(id: string, caption: string) {
+    setBody({
+      ...body,
+      photos: quotePhotos(body).map((photo) =>
+        photo.id === id
+          ? { ...photo, caption: caption.slice(0, maxCaptionLength) }
+          : photo
+      ),
+    });
+  }
+
+  function saveQuotePhotoCaptions() {
+    void persist(body);
   }
 
   async function onChat(event: FormEvent) {
@@ -349,7 +466,7 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
             <button
               className="btn btn-ghost"
               type="button"
-              disabled={busy || photos.length >= maxPhotos}
+              disabled={busy || photos.length >= maxChatPhotos}
               onClick={() => photoInput.current?.click()}
             >
               Add photo
@@ -419,8 +536,62 @@ export function QuoteWorkspace({ quote, messages: saved }: Props) {
           </button>
         </div>
         {notice ? <p className="quotes-notice">{notice}</p> : null}
-        {saving ? <p className="quotes-notice">Saving prices…</p> : null}
+        {saving ? <p className="quotes-notice">Saving…</p> : null}
         <p className="quotes-status">Status: {status}</p>
+        <h2 className="quotes-edit-heading">Attachments</h2>
+        <p className="quotes-notice">
+          Photos appear at the end of the quote PDF. Large images are
+          compressed automatically (up to {maxQuotePhotos}).
+        </p>
+        <input
+          ref={quotePhotoInput}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(event) => {
+            if (event.target.files?.length) {
+              void addQuotePhotos(event.target.files);
+            }
+            event.target.value = "";
+          }}
+        />
+        {quotePhotos(body).length ? (
+          <ul className="quotes-quote-photos">
+            {quotePhotos(body).map((photo) => (
+              <li key={photo.id}>
+                <img src={photo.url} alt={photo.caption || "Attachment"} />
+                <input
+                  type="text"
+                  value={photo.caption ?? ""}
+                  maxLength={maxCaptionLength}
+                  placeholder="Short description (optional)"
+                  onChange={(event) =>
+                    updateQuotePhotoCaption(photo.id, event.target.value)
+                  }
+                  onBlur={saveQuotePhotoCaptions}
+                />
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => removeQuotePhoto(photo.id)}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <button
+          className="btn btn-ghost"
+          type="button"
+          disabled={
+            addingQuotePhotos || quotePhotos(body).length >= maxQuotePhotos
+          }
+          onClick={() => quotePhotoInput.current?.click()}
+        >
+          {addingQuotePhotos ? "Adding…" : "Add attachment"}
+        </button>
         {body.lineItems.length ? (
           <>
             <h2 className="quotes-edit-heading">Edit prices</h2>

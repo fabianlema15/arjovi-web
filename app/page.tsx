@@ -3,9 +3,12 @@ import { Gallery } from "@/components/Gallery";
 import { RevealFallback } from "@/components/RevealFallback";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { listPublishedProjectsWithPhotos } from "@/lib/portfolio-db";
 import { services, site } from "@/lib/site";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const projects = await listPublishedProjectsWithPhotos();
+
   return (
     <>
       <a className="skip-link" href="#main">
@@ -144,7 +147,7 @@ export default function HomePage() {
               <p className="eyebrow">Gallery</p>
               <h2>Recent work.</h2>
             </div>
-            <Gallery />
+            <Gallery projects={projects} />
           </div>
         </section>
 

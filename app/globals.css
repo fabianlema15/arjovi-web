@@ -694,6 +694,18 @@ p {
   padding: 0.8rem 0.2rem 0;
   color: #fff;
   text-align: center;
+  max-width: min(42rem, 92vw);
+}
+
+.lightbox-caption strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.lightbox-caption p {
+  margin: 0.35rem 0 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
 }
 
 .lightbox-close {
@@ -934,7 +946,72 @@ body.js-reveal .contact-layout > *.is-visible {
 
 .quotes-nav-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.6rem;
+}
+
+.quotes-staff-links {
+  display: flex;
+  gap: 0.75rem;
+  margin-right: 0.35rem;
+}
+
+.quotes-staff-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.quotes-staff-links a.is-active,
+.quotes-staff-links a:hover {
+  color: var(--text);
+}
+
+.quotes-project-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.quotes-project-editor {
+  max-width: 48rem;
+}
+
+.quotes-project-fields {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.quotes-project-fields label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.quotes-project-fields input,
+.quotes-project-fields textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--line);
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.quotes-project-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.gallery-empty {
+  color: var(--muted);
+  margin: 0;
 }
 
 .quotes-list-wrap {
@@ -977,6 +1054,7 @@ body.js-reveal .contact-layout > *.is-visible {
 .quotes-login-form input,
 .quotes-toolbar input,
 .quote-table-edit input,
+.quotes-quote-photos input,
 .quotes-composer textarea {
   width: 100%;
   padding: 0.65rem 0.75rem;
@@ -1127,6 +1205,50 @@ body.js-reveal .contact-layout > *.is-visible {
 .quotes-edit-heading {
   font-size: 1.1rem;
   margin: 1rem 0 0.5rem;
+}
+
+.quotes-quote-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0.75rem 0;
+  padding: 0;
+}
+
+.quotes-quote-photos li {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.quotes-quote-photos img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0.35rem;
+  background: #eee;
+}
+
+.quote-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+}
+
+.quote-photo-grid img {
+  width: 100%;
+  max-height: 14rem;
+  object-fit: contain;
+  background: #f3f3f3;
+}
+
+.quote-photo-grid p {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #444;
 }
 
 .quote-sheet {

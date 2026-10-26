@@ -4,6 +4,7 @@ import {
   optionalWorkNote,
   quoteOptionalItems,
   quotePaymentLines,
+  quotePhotos,
   quoteTotals,
   type QuoteBody,
 } from "@/lib/quote";
@@ -21,6 +22,7 @@ export function QuotePreview({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
   const optionalItems = quoteOptionalItems(body);
   const optionalTotals = quoteTotals(optionalItems);
+  const photos = quotePhotos(body);
   const payments = quotePaymentLines(totals.total);
 
   return (
@@ -162,6 +164,19 @@ export function QuotePreview({ number, date, revisedDate, body }: Props) {
           <li key={note}>{note}</li>
         ))}
       </ul>
+      {photos.length ? (
+        <>
+          <h2>{quoteHeadings.photos}</h2>
+          <ul className="quote-photo-grid">
+            {photos.map((photo) => (
+              <li key={photo.id}>
+                <img src={photo.url} alt={photo.caption || "Attachment"} />
+                {photo.caption ? <p>{photo.caption}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </article>
   );
 }

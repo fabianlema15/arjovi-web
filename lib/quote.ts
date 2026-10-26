@@ -4,6 +4,13 @@ export type QuoteAttachment = {
   filename?: string;
 };
 
+export type QuotePhoto = {
+  id: string;
+  mediaType: string;
+  url: string;
+  caption?: string;
+};
+
 export type QuoteLineItem = {
   description: string;
   labor: number;
@@ -23,6 +30,7 @@ export type QuoteBody = {
   scopeOfWork: QuoteSection[];
   lineItems: QuoteLineItem[];
   optionalLineItems?: QuoteLineItem[];
+  photos?: QuotePhoto[];
   duration: string;
   paymentTerms: string[];
   validityDays: number;
@@ -70,6 +78,10 @@ export function lineSubtotal(item: QuoteLineItem) {
 
 export function quoteOptionalItems(body: QuoteBody) {
   return body.optionalLineItems ?? [];
+}
+
+export function quotePhotos(body: QuoteBody) {
+  return body.photos ?? [];
 }
 
 export function quoteTotals(items: QuoteLineItem[]) {
@@ -218,6 +230,7 @@ export function emptyQuoteBody(): QuoteBody {
     scopeOfWork: [],
     lineItems: [],
     optionalLineItems: [],
+    photos: [],
     duration: "",
     paymentTerms: [
       "10% deposit upon acceptance",

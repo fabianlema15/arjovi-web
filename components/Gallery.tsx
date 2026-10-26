@@ -1,23 +1,30 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { gallery } from "@/lib/site";
+import type { PortfolioProjectPublic } from "@/lib/portfolio";
 
-type GalleryItem = (typeof gallery)[number];
+type Props = {
+  projects: PortfolioProjectPublic[];
+};
+
+type ActiveView = {
+  projectId: string;
+  photoIndex: number;
+};
 
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-export function Gallery() {
+export function Gallery({ projects }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [active, setActive] = useState<GalleryItem | null>(null);
+  const [active, setActive] = useState<ActiveView | null>(null);
   const [range, setRange] = useState({
     start: 1,
-    end: Math.min(4, gallery.length),
+    end: Math.min(4, projects.length),
     canPrev: false,
-    canNext: gallery.length > 4,
+    canNext: projects.length > 4,
   });
 
   const updateRange = useCallback(() => {
@@ -27,13 +34,18 @@ export function Gallery() {
       return;
     }
 
-    const gap = Number.parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+    const gap =
+      Number.parseFloat(
+        getComputedStyle(track).columnGap || getComputedStyle(track).gap
+      ) || 0;
     const stride = firstItem.getBoundingClientRect().width + gap;
     const index = stride > 0 ? Math.round(track.scrollLeft / stride) : 0;
     const visible =
-      stride > 0 ? Math.max(1, Math.round((track.clientWidth + gap) / stride)) : 1;
-    const start = Math.min(index + 1, gallery.length);
-    const end = Math.min(index + visible, gallery.length);
+      stride > 0
+        ? Math.max(1, Math.round((track.clientWidth + gap) / stride))
+        : 1;
+    const start = Math.min(index + 1, Math.max(projects.length, 1));
+    const end = Math.min(index + visible, projects.length);
 
     setRange({
       start,
@@ -41,7 +53,7 @@ export function Gallery() {
       canPrev: track.scrollLeft > 4,
       canNext: track.scrollLeft + track.clientWidth < track.scrollWidth - 4,
     });
-  }, []);
+  }, [projects.length]);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -79,8 +91,20 @@ export function Gallery() {
     }
   }, [active]);
 
+  const activeProject = active
+    ? projects.find((project) => project.id === active.projectId)
+    : null;
+  const activePhotos = activeProject?.photos ?? [];
+  const activePhoto =
+    active && activePhotos.length
+      ? activePhotos[
+          ((active.photoIndex % activePhotos.length) + activePhotos.length) %
+            activePhotos.length
+        ]
+      : null;
+
   useEffect(() => {
-    if (!active) {
+    if (!active || activePhotos.length < 2) {
       return;
     }
 
@@ -95,15 +119,21 @@ export function Gallery() {
         if (!current) {
           return current;
         }
-
-        const index = gallery.findIndex((item) => item.src === current.src);
-        return gallery[(index + step + gallery.length) % gallery.length];
+        const project = projects.find((item) => item.id === current.projectId);
+        const count = project?.photos.length ?? 0;
+        if (count < 2) {
+          return current;
+        }
+        return {
+          projectId: current.projectId,
+          photoIndex: (current.photoIndex + step + count) % count,
+        };
       });
     }
 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active]);
+  }, [active, activePhotos.length, projects]);
 
   function scrollPage(direction: -1 | 1) {
     const track = trackRef.current;
@@ -117,12 +147,27 @@ export function Gallery() {
     });
   }
 
-  const activeIndex = active
-    ? gallery.findIndex((item) => item.src === active.src)
-    : -1;
+  function openProject(projectId: string) {
+    setActive({ projectId, photoIndex: 0 });
+  }
 
   function showAt(index: number) {
-    setActive(gallery[(index + gallery.length) % gallery.length]);
+    if (!activeProject) {
+      return;
+    }
+    const count = activeProject.photos.length;
+    setActive({
+      projectId: activeProject.id,
+      photoIndex: (index + count) % count,
+    });
+  }
+
+  if (!projects.length) {
+    return (
+      <p className="gallery-empty">
+        Project photos will appear here soon.
+      </p>
+    );
   }
 
   return (
@@ -135,8 +180,8 @@ export function Gallery() {
         <div className="gallery-controls">
           <p className="gallery-status" aria-live="polite">
             {range.start === range.end
-              ? `${range.start} of ${gallery.length}`
-              : `${range.start}–${range.end} of ${gallery.length}`}
+              ? `${range.start} of ${projects.length}`
+              : `${range.start}–${range.end} of ${projects.length}`}
           </p>
           <button
             className="gallery-arrow"
@@ -159,19 +204,21 @@ export function Gallery() {
         </div>
 
         <div className="gallery-track" ref={trackRef}>
-          {gallery.map((item, index) => (
+          {projects.map((project, index) => (
             <button
               className="gallery-item"
               type="button"
-              key={item.src}
-              onClick={() => setActive(item)}
+              key={project.id}
+              onClick={() => openProject(project.id)}
             >
-              <img
-                src={item.src}
-                alt={item.alt}
-                loading={index < 4 ? "eager" : "lazy"}
-              />
-              <span>{item.caption}</span>
+              {project.coverSrc ? (
+                <img
+                  src={project.coverSrc}
+                  alt={project.title}
+                  loading={index < 4 ? "eager" : "lazy"}
+                />
+              ) : null}
+              <span>{project.title}</span>
             </button>
           ))}
         </div>
@@ -180,7 +227,7 @@ export function Gallery() {
       <dialog
         className="lightbox"
         ref={dialogRef}
-        aria-label="Image preview"
+        aria-label="Project photos"
         onClose={() => setActive(null)}
         onClick={(event) => {
           if (event.target === event.currentTarget) {
@@ -188,7 +235,7 @@ export function Gallery() {
           }
         }}
       >
-        {active ? (
+        {activeProject && activePhoto ? (
           <>
             <button
               className="lightbox-close"
@@ -198,24 +245,37 @@ export function Gallery() {
             >
               &times;
             </button>
-            <button
-              className="lightbox-arrow lightbox-prev"
-              type="button"
-              aria-label="Previous photo"
-              onClick={() => showAt(activeIndex - 1)}
-            >
-              <Chevron direction="left" />
-            </button>
-            <img src={active.src} alt={active.alt} />
-            <button
-              className="lightbox-arrow lightbox-next"
-              type="button"
-              aria-label="Next photo"
-              onClick={() => showAt(activeIndex + 1)}
-            >
-              <Chevron direction="right" />
-            </button>
-            <p className="lightbox-caption">{active.caption}</p>
+            {activePhotos.length > 1 ? (
+              <button
+                className="lightbox-arrow lightbox-prev"
+                type="button"
+                aria-label="Previous photo"
+                onClick={() => showAt((active?.photoIndex ?? 0) - 1)}
+              >
+                <Chevron direction="left" />
+              </button>
+            ) : null}
+            <img
+              src={activePhoto.src}
+              alt={activePhoto.caption || activeProject.title}
+            />
+            {activePhotos.length > 1 ? (
+              <button
+                className="lightbox-arrow lightbox-next"
+                type="button"
+                aria-label="Next photo"
+                onClick={() => showAt((active?.photoIndex ?? 0) + 1)}
+              >
+                <Chevron direction="right" />
+              </button>
+            ) : null}
+            <div className="lightbox-caption">
+              <strong>{activeProject.title}</strong>
+              {activeProject.description ? (
+                <p>{activeProject.description}</p>
+              ) : null}
+              {activePhoto.caption ? <p>{activePhoto.caption}</p> : null}
+            </div>
           </>
         ) : null}
       </dialog>

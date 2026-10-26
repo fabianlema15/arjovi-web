@@ -3,6 +3,7 @@ export const quoteHeadings = {
   work: "🔧 Scope of Work",
   cost: "💵 Estimated Cost Breakdown",
   optional: "✳️ Optional Work",
+  photos: "📎 Attachments",
   duration: "⏱ Estimated Project Duration",
   payment: "💳 Payment Terms",
   validity: "📅 Quote Validity",

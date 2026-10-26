@@ -1,6 +1,15 @@
 import path from "node:path";
 import { Document, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
-import { formatMoney, lineSubtotal, optionalWorkNote, quoteOptionalItems, quotePaymentLines, quoteTotals, type QuoteBody } from "@/lib/quote";
+import {
+  formatMoney,
+  lineSubtotal,
+  optionalWorkNote,
+  quoteOptionalItems,
+  quotePaymentLines,
+  quotePhotos,
+  quoteTotals,
+  type QuoteBody,
+} from "@/lib/quote";
 import { site } from "@/lib/site";
 
 function emojiSrc(name: string) {
@@ -64,6 +73,27 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
   },
   grand: { marginTop: 8, fontFamily: "Helvetica-Bold", fontSize: 12 },
+  photoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  photoCard: {
+    width: "48%",
+    marginBottom: 8,
+  },
+  photo: {
+    width: "100%",
+    maxHeight: 220,
+    objectFit: "contain",
+  },
+  photoCaption: {
+    fontSize: 8,
+    color: "#444",
+    marginTop: 3,
+  },
   footer: {
     position: "absolute",
     bottom: 20,
@@ -95,6 +125,7 @@ export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
   const totals = quoteTotals(body.lineItems);
   const optionalItems = quoteOptionalItems(body);
   const optionalTotals = quoteTotals(optionalItems);
+  const photos = quotePhotos(body);
   const payments = quotePaymentLines(totals.total);
 
   return (
@@ -225,6 +256,21 @@ export function QuotePdfDocument({ number, date, revisedDate, body }: Props) {
             - {note}
           </Text>
         ))}
+        {photos.length ? (
+          <>
+            <Heading icon="attachments" label="Attachments" />
+            <View style={styles.photoGrid}>
+              {photos.map((photo) => (
+                <View key={photo.id} style={styles.photoCard} wrap={false}>
+                  <Image src={photo.url} style={styles.photo} />
+                  {photo.caption ? (
+                    <Text style={styles.photoCaption}>{photo.caption}</Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          </>
+        ) : null}
         <Text
           style={styles.footer}
           render={({ pageNumber, totalPages }) =>
