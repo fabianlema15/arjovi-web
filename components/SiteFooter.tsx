@@ -29,7 +29,7 @@ export function SiteFooter() {
             height={589}
           />
         </a>
-        <p>© {year} Arjovi Solutions. Otsego, MN.</p>
+        <p>© {year} Arjovi Solutions. Minnesota.</p>
         <a href="#top" onClick={scrollToTop}>
           Back to top
         </a>

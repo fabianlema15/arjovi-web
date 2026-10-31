@@ -115,6 +115,24 @@ export async function deleteProject(id: string) {
   await getDb().delete(portfolioProjects).where(eq(portfolioProjects.id, id));
 }
 
+/** Persist gallery order from a full ordered id list (0..n-1). */
+export async function reorderProjects(orderedIds: string[]) {
+  if (!orderedIds.length) {
+    return listProjectsAdmin();
+  }
+  const db = getDb();
+  const now = new Date();
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      db
+        .update(portfolioProjects)
+        .set({ sortOrder: index, updatedAt: now })
+        .where(eq(portfolioProjects.id, id))
+    )
+  );
+  return listProjectsAdmin();
+}
+
 export async function addPhoto(
   projectId: string,
   input: { caption?: string; mediaType: string; data: string }

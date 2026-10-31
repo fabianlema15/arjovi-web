@@ -26,7 +26,7 @@ export default async function HomePage() {
             />
           </div>
           <div className="container hero-content">
-            <p className="eyebrow">Otsego, Minnesota</p>
+            <p className="eyebrow">Minnesota</p>
             <h1>Home and outdoor solutions you can count on.</h1>
             <p className="hero-lead">
               Painting, landscaping, hardscaping, demolition, and handyman

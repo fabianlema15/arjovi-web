@@ -976,6 +976,16 @@ body.js-reveal .contact-layout > *.is-visible {
   margin-bottom: 1rem;
 }
 
+.quotes-sort-controls {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.quotes-sort-controls .btn {
+  min-width: 2.25rem;
+  padding-inline: 0.45rem;
+}
+
 .quotes-project-editor {
   max-width: 48rem;
 }

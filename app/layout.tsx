@@ -16,7 +16,7 @@ const barlow = Barlow({
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
-  title: `${site.name} | Home Services in Otsego, MN`,
+  title: `${site.name} | Home Services in Minnesota`,
   description: site.description,
   icons: { icon: "/assets/brand/logo.png" },
   openGraph: {
@@ -50,11 +50,10 @@ const jsonLd = {
   image: `${site.url}/assets/brand/logo.png`,
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Otsego",
     addressRegion: "MN",
     addressCountry: "US",
   },
-  areaServed: "Otsego, MN",
+  areaServed: "Minnesota",
   priceRange: "$$",
   description: site.description,
 };

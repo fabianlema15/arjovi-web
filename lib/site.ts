@@ -6,9 +6,9 @@ export const site = {
   email: "fabianlema@arjovi.com",
   phone: "(612) 807-5426",
   phoneHref: "tel:+16128075426",
-  location: "Otsego, MN",
+  location: "Minnesota",
   description:
-    "Painting, landscaping, hardscaping, demolition, and handyman services in Otsego, Minnesota. Free estimates.",
+    "Painting, landscaping, hardscaping, demolition, and handyman services in Minnesota. Free estimates.",
 };
 
 export const services = [

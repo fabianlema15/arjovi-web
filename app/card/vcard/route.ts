@@ -9,7 +9,7 @@ export function GET() {
     "TEL;TYPE=CELL,VOICE:+16128075426",
     `EMAIL;TYPE=WORK:${site.email}`,
     `URL:${site.url}`,
-    "ADR;TYPE=WORK:;;Otsego;MN;;;US",
+    "ADR;TYPE=WORK:;;;MN;;;US",
     "END:VCARD",
     "",
   ].join("\r\n");
